@@ -1,144 +1,87 @@
 package com.early_reflections;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import com.early_reflections.json.Quote;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.scene.Scene;
+import javafx.scene.chart.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.stage.Stage;
+
 import java.util.List;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.jfree.ui.RefineryUtilities;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
-import com.early_reflections.indicators.Indicator;
-import com.early_reflections.indicators.MovingAverage;
-import com.early_reflections.json.HistoricalData;
-import com.early_reflections.json.Quote;
-import com.google.gson.Gson;
+public class Main extends Application {
 
-public class Main {
+    static XYChart.Series quoteSeries = new XYChart.Series();
 
-	public static void main(final String[] args) {
 
-		List<Indicator> indicators = new ArrayList<Indicator>();
-		MovingAverage movingAverage200 = new MovingAverage(200);
-		indicators.add(movingAverage200);
+    @Override
+    public void start(Stage stage) {
+        stage.setTitle("Line Chart Sample");
 
-		Main t = new Main();
-		List<Quote> quotes = t.fetchQuotesPastYears(6);
+        final CategoryAxis xAxisLineChart = new CategoryAxis();
+        final NumberAxis yAxisLineChart = new NumberAxis();
+        xAxisLineChart.setLabel("Number of Month");
+        final LineChart<String,Number> lineChart = new LineChart(xAxisLineChart,yAxisLineChart);
+        lineChart.setTitle("Stock Monitoring, 2010");
+        quoteSeries.setName("My portfolio");
+        lineChart.getData().add(quoteSeries);
+        lineChart.setCreateSymbols(false);
+        lineChart.setAnimated(false);
 
-		Strategy s = new Strategy200(movingAverage200);
-		for (int quoteIndex = 0; quoteIndex < quotes.size(); quoteIndex++) {
-			for (Indicator indicator : indicators) {
-				indicator.performTradingDay(quotes.get(quoteIndex));
-			}
-			s.performTradingDay(quotes.get(quoteIndex));
-		}
 
-		// Chart
-		final Chart demo = new Chart("Chart 1", quotes, indicators);
-		demo.pack();
-		RefineryUtilities.centerFrameOnScreen(demo);
-		demo.setVisible(true);
+        Scene scene  = new Scene(lineChart,800,600);
 
-	}
 
-	List<Quote> fetchQuotesPastYears(int lastYears) {
-		List<Quote> quotes = new ArrayList<Quote>();
-		int year = new LocalDate().getYear();
-		for (int i = 0; i < lastYears; i++) {
-			List<Quote> q = fetchQuotes(year);
-			if (q == null) {
-				// TODO
-			}
-			quotes.addAll(q);
-			year--;
-		}
-		return sortQuotes(quotes);
-	}
+        stage.setScene(scene);
+        stage.show();
 
-	private List<Quote> sortQuotes(List<Quote> quotes) {
-		Collections.sort(quotes, new Comparator<Quote>() {
+        new Thread(task).start();
 
-			@Override
-			public int compare(Quote o1, Quote o2) {
-				return o1.getDate().compareTo(o2.getDate());
-			}
-		});
-		return quotes;
-	}
 
-	private List<Quote> fetchQuotes(int year) {
-		LocalDate from = new LocalDate(year, 1, 1);
-		LocalDate to = from.dayOfYear().withMaximumValue();
-		if (to.compareTo(new LocalDate()) == 1) {
-			to = new LocalDate();
-		}
-		return fetchQuotes(from, to);
-	}
+    }
 
-	/**
-	 * Maximum range between from and to is 1 year
-	 */
-	private List<Quote> fetchQuotes(LocalDate from, LocalDate to) {
-		try {
-			URI uri = buildQuery(from, to);
-			HttpGet httpget = new HttpGet(uri);
-			CloseableHttpClient httpclient = HttpClients.createDefault();
-			CloseableHttpResponse response = httpclient.execute(httpget);
-			HttpEntity entity = response.getEntity();
-			if (entity != null) {
-				InputStream instream = entity.getContent();
-				if (instream != null) {
-					final Gson gson = new Gson();
-					final BufferedReader reader = new BufferedReader(new InputStreamReader(instream));
-					HistoricalData data = gson.fromJson(reader, HistoricalData.class);
-					List<Quote> quotes = data.getQuery().getResults().getQuote();
-					instream.close();
-					return sortQuotes(quotes);
-				}
-			}
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 
-		return null;
-	}
+    Task<Integer> task = new Task<Integer>() {
+        @Override protected Integer call() throws Exception {
 
-	private URI buildQuery(LocalDate from, LocalDate to) throws URISyntaxException {
-		String toStr = toDateString(to);
-		String fromStr = toDateString(from);
-		URI uri = new URIBuilder()//
-				.setScheme("http")//
-				.setHost("query.yahooapis.com")//
-				.setPath("/v1/public/yql")//
-				.setParameter(
-						"q",
-						"select * from yahoo.finance.historicaldata where symbol = \"^GDAXI\" and startDate = \""
-								+ fromStr + "\" and endDate = \"" + toStr + "\"")//
-				.setParameter("format", "json")//
-				.setParameter("env", "store://datatables.org/alltableswithkeys")//
-				.build();
-		return uri;
-	}
 
-	public static String toDateString(LocalDate date) {
-		DateTimeFormatter formatter = DateTimeFormat.forPattern(Quote.DATE_FORMAT);
-		return date.toString(formatter);
-	}
+            YahooData t = new YahooData();
+            List<Quote> quotes = t.fetchQuotesPastYears(6); // TODO move this old stuff to separate class
+            int i=0;
+            for (final Quote q : quotes) {
+                if (isCancelled()) {
+                    break;
+                }
+final int i2 = i++;
+                Thread.sleep(100);
+                // TODO performance could be improved by adding the data block wise to the chart (collect and add every 100ms or so)
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        XYChart.Data data = new XYChart.Data(q.getDate().toString(), q.getOpen());
 
+
+                            if(i2%10==0) {
+                                data.setNode(new Circle(6, Color.GREEN));
+
+                            }
+                        if(i2%15==0) {
+                            data.setNode(new Circle(6, Color.ORANGE));
+
+                        }
+                        quoteSeries.getData().add(data);
+                    }
+                });
+            }
+            return 0;
+        }
+    };
+
+    public static void main(String[] args) {
+        launch(args);
+    }
 }
