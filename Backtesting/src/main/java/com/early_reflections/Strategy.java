@@ -23,7 +23,10 @@ public abstract class Strategy {
 	 */
 	protected abstract Trade tick(Quote quote);
 
-
+    /**
+     *
+     * @return All historic quotes
+     */
 	public List<Quote> getQuotes() {
 		return quotes;
 	}
