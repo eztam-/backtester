@@ -57,7 +57,7 @@ public class Main extends Application {
                     break;
                 }
 final int i2 = i++;
-                Thread.sleep(100);
+                Thread.sleep(100); // TODO make this configurable in UI via slider
                 // TODO performance could be improved by adding the data block wise to the chart (collect and add every 100ms or so)
                 Platform.runLater(new Runnable() {
                     @Override
