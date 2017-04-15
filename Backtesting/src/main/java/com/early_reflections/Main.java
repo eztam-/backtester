@@ -22,39 +22,52 @@ import java.util.List;
 
 public class Main extends Application {
 
-    static XYChart.Series quoteSeries = new XYChart.Series();
-    static XYChart.Series balanceSeries = new XYChart.Series();
+     private XYChart.Series quoteSeries = new XYChart.Series();
+     private XYChart.Series balanceSeries = new XYChart.Series();
+    private Broker broker = new Broker();
 
+    private Strategy strategy = new Strategy200();
 
     @Override
     public void start(Stage stage) {
         stage.setTitle("Line Chart Sample");
 
-        Scene scene  = new Scene(addVBox(),800,600);
+        Scene scene  = new Scene(createUiComponents(),800,600);
         stage.setScene(scene);
         stage.show();
 
         new Thread(task).start();
+        task.setOnSucceeded(evt -> System.out.println("Task succeeded!"));
+        task.setOnCancelled(evt -> System.out.println("Task cancelled!"));
+        task.setOnFailed(evt -> {
+            if (task.getException() instanceof Broker.BrokerException) {
+                System.out.println("Broker error: "+task.getException().getMessage());
+            }
+            else{
+                task.getException().printStackTrace();
+            }
+        });
+
     }
 
-
+    // TODO extract this to MVC pattern
     Task<Integer> task = new Task<Integer>() {
-        @Override protected Integer call() throws Exception {
-
+        @Override
+        protected Integer call() throws InterruptedException {
 
             YahooData t = new YahooData();
             List<Quote> quotes = t.fetchQuotesPastYears(6); // TODO move this old stuff to separate class
-            int i=0;
+
             for (final Quote q : quotes) {
                 if (isCancelled()) { // TODO ad cancel button in UI
                     break;
                 }
+                Thread.sleep(10); // TODO make this configurable in UI via slider
+                final Trade trade =  strategy.processTick(q);
+                broker.trade(trade, q);
+                final double accountWorth = broker.getAccountWorth(q);
 
-                Thread.sleep(100); // TODO make this configurable in UI via slider
-
-                final Trade trade =  strategyTick(q);
-
-                // TODO performance could be improved by adding the data block wise to the chart (collect and add every 100ms or so)
+                // TODO performance could be improved by adding the data block wise to the chart (collect and add every 100ms or so). Do this avter extracted the MVC pattern
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
@@ -62,20 +75,18 @@ public class Main extends Application {
                         addTradeNode(quoteData, trade);
                         quoteSeries.getData().add(quoteData);
 
-                        XYChart.Data balanceData = new XYChart.Data(q.getDate().toString(), q.getOpen());
+                        XYChart.Data balanceData = new XYChart.Data(q.getDate().toString(), accountWorth);
                         balanceSeries.getData().add(balanceData);
                     }
                 });
             }
             return 0;
         }
-
-
     };
 
 
 
-     VBox addVBox() {
+     VBox createUiComponents() {
 
         // Create quote chart
          final CategoryAxis xAxisQuoteChart = new CategoryAxis();

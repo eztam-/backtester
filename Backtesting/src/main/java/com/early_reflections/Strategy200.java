@@ -13,25 +13,24 @@ import com.early_reflections.json.Quote;
  */
 public class Strategy200 extends Strategy {
 
-	private double deposit = 1000;
+
 
 	private MovingAverage movingAverage;
 
-	public Strategy200(MovingAverage movingAverage200) {
+	/*public Strategy200(MovingAverage movingAverage200) {
 		this.movingAverage = movingAverage200;
 	}
-
+*/
 	@Override
-	public double getPerformancePercent() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	protected void tradingDayTick(Quote quote) {
+	protected Trade tick(Quote quote) {
 
 		System.out.println("Good morning, today is " + quote.getDate() + " have a successfull trading day! ");
+		if(quote.getOpen()> 8000) {
+			return new Trade(Trade.Type.BUY, 1);
+		}else if(quote.getOpen()<1000) {
+			return new Trade(Trade.Type.SELL, 1);
+		}
 
-		// TODO
+		return null;
 	}
 }

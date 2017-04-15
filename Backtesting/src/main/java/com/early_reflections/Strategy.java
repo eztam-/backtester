@@ -9,26 +9,20 @@ public abstract class Strategy {
 
 	private List<Quote> quotes = new ArrayList<>();
 
-	public void performTradingDay(Quote quote) {
+	public Trade processTick(Quote quote) {
 		this.quotes.add(quote);
-		tradingDayTick(quote);
+		Trade trade = tick(quote);
+		return trade == null ? new Trade() : trade;
 	}
 
 	/**
-	 * Gets called on each tick (daily).
+	 * Is called on each quote tick (e.g. daily).
 	 * 
-	 * @param quote
-	 *            The quote of the current tick
+	 * @param quote The quote of the current tick
+	 * @return  A buy or sell trade if the strategy decides to perform a trade. Otherwise null.
 	 */
-	protected abstract void tradingDayTick(Quote quote);
+	protected abstract Trade tick(Quote quote);
 
-	/**
-	 * Returns the calculated performance result of the strategy. This method
-	 * gets called after the simulation is finished
-	 * 
-	 * @return The performance of the strategy in percentage.
-	 */
-	public abstract double getPerformancePercent();
 
 	public List<Quote> getQuotes() {
 		return quotes;
