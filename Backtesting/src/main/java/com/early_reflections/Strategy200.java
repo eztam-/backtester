@@ -1,7 +1,7 @@
 package com.early_reflections;
 
 import com.early_reflections.indicators.MovingAverage;
-import com.early_reflections.json.Quote;
+import com.early_reflections.yahoodata.Quote;
 
 /**
  * This strategy places a long order if the price moves from a lower value to

@@ -1,7 +1,7 @@
 package com.early_reflections;
 
-import com.early_reflections.json.Quote;
-import com.early_reflections.json.YahooData;
+import com.early_reflections.yahoodata.Quote;
+import com.early_reflections.yahoodata.YahooDataSource;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -83,8 +83,8 @@ public class Controller implements Initializable {
         @Override
         protected Integer call() throws InterruptedException {
 
-            YahooData t = new YahooData();
-            List<Quote> quotes = t.fetchQuotesPastYears(6); // TODO move this old stuff to separate class
+            YahooDataSource t = new YahooDataSource();
+            List<Quote> quotes = t.fetchHistoricQuotes(); // TODO move this old stuff to separate class
 
             for (final Quote q : quotes) {
                 if (isCancelled()) { // TODO ad cancel button in UI

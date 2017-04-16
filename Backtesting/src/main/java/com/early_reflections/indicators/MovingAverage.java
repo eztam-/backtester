@@ -5,7 +5,7 @@ import java.util.TreeMap;
 
 import org.joda.time.LocalDate;
 
-import com.early_reflections.json.Quote;
+import com.early_reflections.yahoodata.Quote;
 
 public class MovingAverage extends Indicator {
 

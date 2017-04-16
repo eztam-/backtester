@@ -6,7 +6,7 @@ import java.util.SortedMap;
 
 import org.joda.time.LocalDate;
 
-import com.early_reflections.json.Quote;
+import com.early_reflections.yahoodata.Quote;
 
 public abstract class Indicator {
 

@@ -1,7 +1,7 @@
 package com.early_reflections;
 
 
-import com.early_reflections.json.Quote;
+import com.early_reflections.yahoodata.Quote;
 
 public class Broker {
 

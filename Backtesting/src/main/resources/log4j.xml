@@ -8,6 +8,9 @@
 			<param name="ConversionPattern" value="%-5p %c{1} - %m%n" />
 		</layout>
 	</appender>
+	<logger name="org.apache.http">
+		<level value="warn"/>
+	</logger>
 
 	<root>
 		<priority value="debug" />

@@ -3,7 +3,7 @@ package com.early_reflections;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.early_reflections.json.Quote;
+import com.early_reflections.yahoodata.Quote;
 
 public abstract class Strategy {
 

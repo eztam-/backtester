@@ -1,4 +1,4 @@
-package com.early_reflections.json;
+package com.early_reflections.yahoodata;
 
 import java.io.*;
 import java.net.URI;
@@ -18,25 +18,31 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import com.google.gson.Gson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class YahooData {
+public class YahooDataSource {
+
+    private final static Logger LOG = LoggerFactory.getLogger(YahooDataSource.class);
 
     public class DataFetchException extends RuntimeException {
         public DataFetchException() {
             super("Error while fetching quotes from server");
         }
-        public DataFetchException( Exception e) {
+
+        public DataFetchException(Exception e) {
             super("Error while fetching quotes from server", e);
         }
     }
 
-    public List<Quote> fetchQuotesPastYears(int lastYears) {
+    public List<Quote> fetchHistoricQuotes() {
         JsonArray quotes = new JsonArray();
         int year = new LocalDate().getYear();
-        for (int i = 0; i < lastYears; i++) {
+        for (int i = 0; i < 100; i++) {
             JsonArray q = fetchQuotes(year);
             if (q == null) {
-               throw new DataFetchException();
+                LOG.debug("No older data than " + year + " is available. Stopping here");
+                break;
             }
             quotes.addAll(q);
             year--;
@@ -51,6 +57,7 @@ public class YahooData {
     }
 
     private JsonArray fetchQuotes(int year) {
+        LOG.debug("Fetching data for year: " + year);
         LocalDate from = new LocalDate(year, 1, 1);
         LocalDate to = from.dayOfYear().withMaximumValue();
         if (to.getYear() == new LocalDate().getYear()) {
@@ -73,12 +80,13 @@ public class YahooData {
                 throw new DataFetchException();
             }
             InputStreamReader reader = new InputStreamReader(entity.getContent());
-            JsonArray quotes = new Gson().fromJson(reader, JsonObject.class)
-                    .getAsJsonObject("query")
-                    .getAsJsonObject("results")
-                    .getAsJsonArray("quote");
+            JsonObject result = new Gson().fromJson(reader, JsonObject.class).getAsJsonObject("query");
             reader.close();
-            return quotes;
+            if (result.get("results").isJsonNull()) {
+               // No older data available.
+                return null;
+            }
+            return result.getAsJsonObject("results").getAsJsonArray("quote");
         } catch (URISyntaxException | IOException e) {
             throw new DataFetchException(e);
         }
