@@ -9,7 +9,6 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.ToolBar?>
 
-<?import com.early_reflections.ui.DateAxis?>
 <SplitPane dividerPositions="0.5, 0.5" orientation="VERTICAL" prefHeight="446.0" prefWidth="502.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.early_reflections.ui.Controller">
    <items>
       <ToolBar prefHeight="40.0" prefWidth="200.0">
@@ -32,7 +31,7 @@
       </LineChart>
 
       <!-- Balance chart-->
-      <LineChart fx:id="balanceChart" animated="false" createSymbols="false" legendVisible="false">
+      <LineChart fx:id="balanceChart" animated="false" createSymbols="false" legendVisible="false" styleClass="balance-chart">
          <xAxis>
             <NumberAxis side="BOTTOM" />
          </xAxis>

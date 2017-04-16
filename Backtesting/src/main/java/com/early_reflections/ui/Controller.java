@@ -7,30 +7,27 @@ import com.early_reflections.Trade;
 import com.early_reflections.yahoodata.Quote;
 import com.early_reflections.yahoodata.YahooDataSource;
 import com.google.gson.Gson;
-import javafx.application.Platform;
+
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
+import javafx.scene.chart.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.util.Duration;
+import javafx.util.StringConverter;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class Controller implements Initializable {
 
@@ -56,9 +53,7 @@ public class Controller implements Initializable {
     private XYChart.Series balanceSeries = new XYChart.Series();
 
     private List<ChartQuote> quotes = new ArrayList<>();
-
-
-    private long lastChartUpdateTs = 0;
+    private List<Double> balanceData = new ArrayList<>();
 
     private Broker broker = new Broker();
 
@@ -66,7 +61,16 @@ public class Controller implements Initializable {
     private int tickSleepMs = 0; // TODO volatile??
     private final static Logger LOG = LoggerFactory.getLogger(YahooDataSource.class);
 
-    public class ChartQuote extends Number {
+    public Collection getBalanceChartData() {
+        List<XYChart.Data> balance = new ArrayList<>();
+        for(int i=0; i<balanceData.size(); i++){
+            XYChart.Data b = new XYChart.Data(i, balanceData.get(i));
+            balance.add(b);
+        }
+        return balance;
+    }
+
+    public class ChartQuote  {
         double value;
         boolean buy, sell;
         String label;
@@ -77,27 +81,6 @@ public class Controller implements Initializable {
             buy = trade.isBuy();
             sell = trade.isSell();
             label = quote.getDate().toString();
-           // xAxisId = quote.getDate().toDateTimeAtStartOfDay().getMillis()/100000;
-        }
-
-        @Override
-        public int intValue() {
-            return xAxisId;
-        }
-
-        @Override
-        public long longValue() {
-            return xAxisId;
-        }
-
-        @Override
-        public float floatValue() {
-            return xAxisId;
-        }
-
-        @Override
-        public double doubleValue() {
-            return xAxisId;
         }
     }
 
@@ -105,9 +88,7 @@ public class Controller implements Initializable {
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         quotesChart.getData().add(quoteSeries);
         balanceChart.getData().add(balanceSeries);
-      // ((NumberAxis)quotesChart.getXAxis()).setForceZeroInRange(false);
-      // ((NumberAxis)balanceChart.getXAxis()).setForceZeroInRange(false);
-
+        ((NumberAxis) quotesChart.getXAxis()).setTickLabelFormatter(new XAxisLabelConverter());
 
         playButton.setOnAction(event -> startBacktest(event));
         stopButton.setOnAction(event -> task.cancel());
@@ -117,8 +98,6 @@ public class Controller implements Initializable {
             System.out.println("Slider Value Changed (newValue: " + newValue.intValue() + ")");
             tickSleepMs = newValue.intValue();
         });
-
-
     }
 
     private void startBacktest(ActionEvent event) {
@@ -141,9 +120,18 @@ public class Controller implements Initializable {
         @Override
         protected Integer call() throws InterruptedException {
 
+            // Updating the chart periodically after some time is much more performant than updating on each new data
+            Timeline periodicChartUpdater = new Timeline(new KeyFrame(Duration.millis(100), event -> {
+               if(quotes.size()!=quoteSeries.getData().size()){ // If chart data has changed
+                   quoteSeries.getData().setAll(getQuoteChartData());
+                   balanceSeries.getData().setAll(getBalanceChartData());
+               }
+            }));
+            periodicChartUpdater.setCycleCount(Timeline.INDEFINITE);
+            periodicChartUpdater.play();
+
 
             List<Quote> quotes = fetchData("^DAXI");
-
             for (final Quote q : quotes) {
                 if (isCancelled()) { // TODO ad cancel button in UI
                     break;
@@ -153,54 +141,51 @@ public class Controller implements Initializable {
                 broker.trade(trade, q);
                 final double accountWorth = broker.getAccountWorth(q);
 
-                updateCharts(accountWorth, q, trade);
+                updateChartData(accountWorth, q, trade);
 
             }
+            periodicChartUpdater.setCycleCount(1); // Run one last time and update the result
             return 0;
         }
     };
 
-    private void updateCharts(double accountWorth, Quote q, Trade trade) {
-        // TODO performance could be improved by adding the data block wise to the chart (collect and add every 100ms or so). Do this avter extracted the MVC pattern
 
-            //XYChart.Data quoteData = new XYChart.Data(q.getDate().toString(), q.getOpen());
-           // addTradeNode(quoteData, trade);
+    private void updateChartData(double accountWorth, Quote q, Trade trade) {
             quotes.add(new ChartQuote(q,trade));
-            if(System.currentTimeMillis() - lastChartUpdateTs > 100){
-                List<XYChart.Data> aggregated = getAggregatedData();
-                Platform.runLater(() -> {
-                    quoteSeries.getData().setAll(aggregated);
-                });
-                lastChartUpdateTs = System.currentTimeMillis();
-            }
-
-
-            XYChart.Data balanceData = new XYChart.Data(q.getDate().toDateTimeAtStartOfDay().getMillis(), accountWorth);
-         //   balanceSeries.getData().add(balanceData);
-
-
-
-
+            balanceData.add(accountWorth);
     }
 
 
-    // TODO use a better aggregation algorithm that takes two vaues (min and max)
-    private List<XYChart.Data> getAggregatedData() {
-        List<XYChart.Data> aggregated = new ArrayList<>();
-        int aggregationFactor = quotes.size() / 1000;
-       int xAxisId =0;
-        for(int i=0 ; i<quotes.size(); i++){
-            if(quotes.size()<1000 || i%aggregationFactor==0){
-                ChartQuote aggrQuote = quotes.get(i);
-                aggrQuote.xAxisId=xAxisId++;
-                System.out.println(aggrQuote.label+" "+aggrQuote.xAxisId);
-                XYChart.Data data = new XYChart.Data(aggrQuote.xAxisId, aggrQuote.value);
-                addTradeNode(data, aggrQuote.buy, aggrQuote.sell);
-                aggregated.add(data);
-            }
+    class XAxisLabelConverter extends StringConverter<Number> {
+
+        @Override
+        public String toString(Number object) {
+                if(object.intValue()<quotes.size()) {
+                    return quotes.get(object.intValue()).label;
+                }
+                return "";
         }
-        return aggregated;
+
+        @Override
+        public Number fromString(String string) {
+            return null;
+        }
     }
+
+
+    private List<XYChart.Data> getQuoteChartData() {
+        List<XYChart.Data> chartData = new ArrayList<>();
+        int xAxisId =0;
+        for(int i=0; i< quotes.size(); i++){
+            ChartQuote chartQuote = quotes.get(i);
+            chartQuote.xAxisId=xAxisId++;
+            XYChart.Data data = new XYChart.Data(chartQuote.xAxisId, chartQuote.value);
+            addTradeNode(data, chartQuote.buy, chartQuote.sell);
+            chartData.add(data);
+        }
+        return chartData;
+    }
+
 
     private List<Quote> fetchData(String symbol) {
         try {
