@@ -12,9 +12,10 @@
 .default-color2.chart-series-area-line { -fx-stroke: #dda0dd; }
 
 .default-color0.chart-series-area-fill { -fx-fill: rgba(58, 250, 47, 0.12); }
-.default-color1.chart-series-area-fill { -fx-fill: #fffacd55; }
-.default-color2.chart-series-area-fill { -fx-fill: #d8bfd855; }
-
+.default-color1.chart-series-area-fill { -fx-fill: none; }
+.default-color2.chart-series-area-fill { -fx-fill: none; }
+.default-color3.chart-series-area-fill { -fx-fill: none; }
+.default-color4.chart-series-area-fill { -fx-fill: none; }
 
 .chart {
     -fx-background-color: rgb(104, 112, 117);

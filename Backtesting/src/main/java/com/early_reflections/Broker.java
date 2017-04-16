@@ -9,7 +9,9 @@ public class Broker {
 
     // Number of shares
     private int holdings = 0;
+    private static Broker instance;
 
+    private Broker(){}
 
     public class BrokerException extends RuntimeException{
         public BrokerException(String message) {
@@ -22,14 +24,18 @@ public class Broker {
         double sum = quote.getOpen() * trade.getQuantity();
         if(trade.isBuy()){
             if(sum > balance){
-               throw new BrokerException("Account limit exceeded"); // TODO replace by internal exception
+                return ;
+                // TODO
+               // throw new BrokerException("Account limit exceeded");
             }
             holdings+=trade.getQuantity();
             balance-=sum;
         }
         else if(trade.isSell()){
             if(trade.getQuantity()>holdings){
-               throw new BrokerException("Cannot sell more shares than available"); // TODO replace by internal exception
+                return ;
+                // TODO
+              // throw new BrokerException("Cannot sell more shares than available");
             }
             holdings-=trade.getQuantity();
             balance+=sum;
@@ -45,6 +51,14 @@ public class Broker {
         return balance + holdings*quote.getOpen();
     }
 
+    public static Broker instance(){
+        if(instance ==null){
+            instance = new Broker();
+        }
+        return instance;
+    }
 
-
+    public int getHoldings() {
+        return holdings;
+    }
 }

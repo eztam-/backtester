@@ -1,7 +1,6 @@
 package com.early_reflections.indicators;
 
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.joda.time.LocalDate;
 
@@ -9,33 +8,35 @@ import com.early_reflections.yahoodata.Quote;
 
 public class MovingAverage extends Indicator {
 
-	private SortedMap<LocalDate, Double> values;
+	private List<Double> values;
 	private int period;
 
 	public MovingAverage(int period) {
-		values = new TreeMap<>();
+		values = new ArrayList();
 		this.period = period;
 	}
 
 	@Override
-	public String getName() {
+	public String getId() {
 		return "Moving Average " + period;
 	}
 
 	@Override
-	public SortedMap<LocalDate, Double> getValues() {
+	public List<Double> getValues() {
 		return values;
 	}
 
 	@Override
 	protected void tradingDayTick(Quote quote) {
-		if (getQuotes().size() < period)
+		if (getQuotes().size() < period) {
+			values.add( null);
 			return;
+		}
 		double sum = 0;
 		for (int i = getQuotes().size() - period; i < getQuotes().size(); i++) {
 			sum += getQuotes().get(i).getOpen();
 		}
 
-		values.put(quote.getDate(), sum / period);
+		values.add( sum / period);
 	}
 }

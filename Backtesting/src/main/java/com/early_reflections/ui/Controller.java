@@ -55,9 +55,11 @@ public class Controller implements Initializable {
     private List<ChartQuote> quotes = new ArrayList<>();
     private List<Double> balanceData = new ArrayList<>();
 
-    private Broker broker = new Broker();
+    private Broker broker =  Broker.instance();
 
     private Strategy strategy = new Strategy200();
+    private IndicatorSeries indicatorHandler;
+
     private int tickSleepMs = 0; // TODO volatile??
     private final static Logger LOG = LoggerFactory.getLogger(YahooDataSource.class);
 
@@ -74,6 +76,7 @@ public class Controller implements Initializable {
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         quotesChart.getData().add(quoteSeries);
         balanceChart.getData().add(balanceSeries);
+        indicatorHandler = new IndicatorSeries(strategy, quotesChart);
         ((NumberAxis) quotesChart.getXAxis()).setTickLabelFormatter(new XAxisLabelConverter());
 
         playButton.setOnAction(event -> startBacktest(event));
@@ -81,13 +84,11 @@ public class Controller implements Initializable {
         // TODO pauseButton
 
         speedSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println("Slider Value Changed (newValue: " + newValue.intValue() + ")");
             tickSleepMs = newValue.intValue();
         });
     }
 
     private void startBacktest(ActionEvent event) {
-        System.out.println("11111");
         new Thread(task).start();
         task.setOnSucceeded(evt -> System.out.println("Task succeeded!"));
         task.setOnCancelled(evt -> System.out.println("Task cancelled!"));
@@ -105,12 +106,12 @@ public class Controller implements Initializable {
 
         @Override
         protected Integer call() throws InterruptedException {
-            System.out.println("######");
             // Updating the chart periodically after some time is much more performant than updating on each new data
             Timeline periodicChartUpdater = new Timeline(new KeyFrame(Duration.millis(100), event -> {
                 if (quotes.size() != quoteSeries.getData().size()) { // If chart data has changed
                     quoteSeries.getData().setAll(getQuoteChartData());
                     balanceSeries.getData().setAll(getBalanceChartData());
+                    indicatorHandler.updateChart();
                 }
             }));
             periodicChartUpdater.setCycleCount(Timeline.INDEFINITE);
@@ -119,10 +120,10 @@ public class Controller implements Initializable {
 
             List<Quote> quotes = fetchData("^DAXI");
             for (final Quote q : quotes) {
-                if (isCancelled()) { // TODO ad cancel button in UI
+                if (isCancelled()) {
                     break;
                 }
-                Thread.sleep(tickSleepMs); // TODO make this configurable in UI via slider
+                Thread.sleep(tickSleepMs);
                 final Trade trade = strategy.processTick(q);
                 broker.trade(trade, q);
                 final double accountWorth = broker.getAccountWorth(q);

@@ -2,9 +2,7 @@ package com.early_reflections.indicators;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedMap;
-
-import org.joda.time.LocalDate;
+import java.util.Map;
 
 import com.early_reflections.yahoodata.Quote;
 
@@ -12,9 +10,9 @@ public abstract class Indicator {
 
 	private List<Quote> quotes = new ArrayList<>();
 
-	public abstract String getName();
+	public abstract String getId();
 
-	public abstract SortedMap<LocalDate, Double> getValues();
+	public abstract List<Double> getValues();
 
 	public void performTradingDay(Quote quote) {
 		this.quotes.add(quote);
@@ -32,4 +30,9 @@ public abstract class Indicator {
 	 *            The quote of the current tick
 	 */
 	protected abstract void tradingDayTick(Quote quote);
+
+	@Override
+	public int hashCode() {
+		return getId().hashCode();
+	}
 }
