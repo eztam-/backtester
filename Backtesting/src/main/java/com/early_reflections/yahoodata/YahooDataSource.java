@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -36,10 +37,10 @@ public class YahooDataSource {
     }
 
     public List<Quote> fetchHistoricQuotes() {
-        JsonArray quotes = new JsonArray();
+        List<Quote> quotes = new LinkedList<>();
         int year = new LocalDate().getYear();
         for (int i = 0; i < 100; i++) {
-            JsonArray q = fetchQuotes(year);
+            List<Quote> q = fetchQuotes(year);
             if (q == null) {
                 LOG.debug("No older data than " + year + " is available. Stopping here");
                 break;
@@ -47,16 +48,12 @@ public class YahooDataSource {
             quotes.addAll(q);
             year--;
         }
-        Quote[] q = new Gson().fromJson(quotes, Quote[].class);
-        return sortQuotes(Arrays.asList(q));
-    }
-
-    private List<Quote> sortQuotes(List<Quote> quotes) {
         quotes.sort(Comparator.comparing(Quote::getDate));
         return quotes;
     }
 
-    private JsonArray fetchQuotes(int year) {
+
+    private List<Quote> fetchQuotes(int year) {
         LOG.debug("Fetching data for year: " + year);
         LocalDate from = new LocalDate(year, 1, 1);
         LocalDate to = from.dayOfYear().withMaximumValue();
@@ -69,7 +66,7 @@ public class YahooDataSource {
     /**
      * Maximum range between from and to is 1 year
      */
-    private JsonArray fetchQuotes(LocalDate from, LocalDate to) {
+    private List<Quote> fetchQuotes(LocalDate from, LocalDate to) {
         try {
             URI uri = buildQuery(from, to);
             HttpGet httpget = new HttpGet(uri);
@@ -80,13 +77,16 @@ public class YahooDataSource {
                 throw new DataFetchException();
             }
             InputStreamReader reader = new InputStreamReader(entity.getContent());
-            JsonObject result = new Gson().fromJson(reader, JsonObject.class).getAsJsonObject("query");
+            JsonElement results = new Gson().fromJson(reader, JsonObject.class).getAsJsonObject("query").get("results");
             reader.close();
-            if (result.get("results").isJsonNull()) {
-               // No older data available.
+            if (results.isJsonNull()) {
+                // No older data available.
                 return null;
             }
-            return result.getAsJsonObject("results").getAsJsonArray("quote");
+            JsonArray quote = results.getAsJsonObject().getAsJsonArray("quote");
+            Quote[] q = new Gson().fromJson(quote, Quote[].class);
+            return Arrays.asList(q);
+
         } catch (URISyntaxException | IOException e) {
             throw new DataFetchException(e);
         }
