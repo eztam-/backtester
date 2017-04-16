@@ -12,7 +12,9 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
@@ -25,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -32,10 +35,10 @@ import java.util.ResourceBundle;
 public class Controller implements Initializable {
 
     @FXML
-    private LineChart<String,Number> quotesChart;
+    private LineChart<Number,Number> quotesChart;
 
     @FXML
-    private LineChart<String,Number> balanceChart;
+    private LineChart<Number,Number> balanceChart;
 
     @FXML
     private Button playButton;
@@ -51,17 +54,60 @@ public class Controller implements Initializable {
 
     private XYChart.Series quoteSeries = new XYChart.Series();
     private XYChart.Series balanceSeries = new XYChart.Series();
+
+    private List<ChartQuote> quotes = new ArrayList<>();
+
+
+    private long lastChartUpdateTs = 0;
+
     private Broker broker = new Broker();
 
     private Strategy strategy = new Strategy200();
     private int tickSleepMs = 0; // TODO volatile??
     private final static Logger LOG = LoggerFactory.getLogger(YahooDataSource.class);
 
+    public class ChartQuote extends Number {
+        double value;
+        boolean buy, sell;
+        String label;
+        int xAxisId;
+
+        ChartQuote(Quote quote, Trade trade){
+            value = quote.getOpen();
+            buy = trade.isBuy();
+            sell = trade.isSell();
+            label = quote.getDate().toString();
+           // xAxisId = quote.getDate().toDateTimeAtStartOfDay().getMillis()/100000;
+        }
+
+        @Override
+        public int intValue() {
+            return xAxisId;
+        }
+
+        @Override
+        public long longValue() {
+            return xAxisId;
+        }
+
+        @Override
+        public float floatValue() {
+            return xAxisId;
+        }
+
+        @Override
+        public double doubleValue() {
+            return xAxisId;
+        }
+    }
 
     @Override
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         quotesChart.getData().add(quoteSeries);
         balanceChart.getData().add(balanceSeries);
+      // ((NumberAxis)quotesChart.getXAxis()).setForceZeroInRange(false);
+      // ((NumberAxis)balanceChart.getXAxis()).setForceZeroInRange(false);
+
 
         playButton.setOnAction(event -> startBacktest(event));
         stopButton.setOnAction(event -> task.cancel());
@@ -107,25 +153,61 @@ public class Controller implements Initializable {
                 broker.trade(trade, q);
                 final double accountWorth = broker.getAccountWorth(q);
 
-                // TODO performance could be improved by adding the data block wise to the chart (collect and add every 100ms or so). Do this avter extracted the MVC pattern
-                Platform.runLater(() -> {
-                    XYChart.Data quoteData = new XYChart.Data(q.getDate().toString(), q.getOpen());
-                    addTradeNode(quoteData, trade);
-                    quoteSeries.getData().add(quoteData);
+                updateCharts(accountWorth, q, trade);
 
-                    XYChart.Data balanceData = new XYChart.Data(q.getDate().toString(), accountWorth);
-                    balanceSeries.getData().add(balanceData);
-                });
             }
             return 0;
         }
     };
+
+    private void updateCharts(double accountWorth, Quote q, Trade trade) {
+        // TODO performance could be improved by adding the data block wise to the chart (collect and add every 100ms or so). Do this avter extracted the MVC pattern
+
+            //XYChart.Data quoteData = new XYChart.Data(q.getDate().toString(), q.getOpen());
+           // addTradeNode(quoteData, trade);
+            quotes.add(new ChartQuote(q,trade));
+            if(System.currentTimeMillis() - lastChartUpdateTs > 100){
+                List<XYChart.Data> aggregated = getAggregatedData();
+                Platform.runLater(() -> {
+                    quoteSeries.getData().setAll(aggregated);
+                });
+                lastChartUpdateTs = System.currentTimeMillis();
+            }
+
+
+            XYChart.Data balanceData = new XYChart.Data(q.getDate().toDateTimeAtStartOfDay().getMillis(), accountWorth);
+         //   balanceSeries.getData().add(balanceData);
+
+
+
+
+    }
+
+
+    // TODO use a better aggregation algorithm that takes two vaues (min and max)
+    private List<XYChart.Data> getAggregatedData() {
+        List<XYChart.Data> aggregated = new ArrayList<>();
+        int aggregationFactor = quotes.size() / 1000;
+       int xAxisId =0;
+        for(int i=0 ; i<quotes.size(); i++){
+            if(quotes.size()<1000 || i%aggregationFactor==0){
+                ChartQuote aggrQuote = quotes.get(i);
+                aggrQuote.xAxisId=xAxisId++;
+                System.out.println(aggrQuote.label+" "+aggrQuote.xAxisId);
+                XYChart.Data data = new XYChart.Data(aggrQuote.xAxisId, aggrQuote.value);
+                addTradeNode(data, aggrQuote.buy, aggrQuote.sell);
+                aggregated.add(data);
+            }
+        }
+        return aggregated;
+    }
 
     private List<Quote> fetchData(String symbol) {
         try {
             File file = new File("^GDAXI.json");
             if(!file.exists() ){
                 LOG.debug("No data file for symbol "+symbol+" found. Downloading it from internet.");
+                // TODO show ui progress bar
                 YahooDataSource t = new YahooDataSource();
                 List<Quote> quotes = t.fetchHistoricQuotes("^GDAXI"); // TODO move this old stuff to separate class
                 FileUtils.writeStringToFile(file, new Gson().toJson(quotes));
@@ -143,12 +225,12 @@ public class Controller implements Initializable {
     /**
      * Adds the buy or sell nodes to the chart data if a trade was performed
      */
-    private void addTradeNode(XYChart.Data data, Trade trade) {
+    private void addTradeNode(XYChart.Data data,boolean buy, boolean sell) {
         // TODO add something more eye cyndy
-        if( trade.isBuy()){
+        if( buy){
             data.setNode(new Circle(6, Color.GREEN));
         }
-        else if( trade.isSell()){
+        else if( sell){
             data.setNode(new Circle(6, Color.RED));
         }
     }

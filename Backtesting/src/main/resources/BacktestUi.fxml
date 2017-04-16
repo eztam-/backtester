@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.ValueAxis?>
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
@@ -9,6 +9,7 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.ToolBar?>
 
+<?import com.early_reflections.ui.DateAxis?>
 <SplitPane dividerPositions="0.5, 0.5" orientation="VERTICAL" prefHeight="446.0" prefWidth="502.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.early_reflections.ui.Controller">
    <items>
       <ToolBar prefHeight="40.0" prefWidth="200.0">
@@ -21,9 +22,9 @@
         </items>
       </ToolBar>
       <!-- Quotes chart -->
-      <LineChart fx:id="quotesChart" animated="false" createSymbols="false" legendVisible="false">
+      <LineChart fx:id="quotesChart" animated="false" createSymbols="false" legendVisible="false" styleClass="quotes-chart">
         <xAxis>
-          <CategoryAxis side="BOTTOM" />
+          <NumberAxis side="BOTTOM" />
         </xAxis>
         <yAxis>
           <NumberAxis side="LEFT" />
@@ -33,7 +34,7 @@
       <!-- Balance chart-->
       <LineChart fx:id="balanceChart" animated="false" createSymbols="false" legendVisible="false">
          <xAxis>
-            <CategoryAxis side="BOTTOM" />
+            <NumberAxis side="BOTTOM" />
          </xAxis>
          <yAxis>
             <NumberAxis side="LEFT" />

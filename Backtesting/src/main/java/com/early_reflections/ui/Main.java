@@ -15,9 +15,9 @@ public class Main extends Application {
         Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("BacktestUi.fxml"));
         primaryStage.setTitle("Backtester");
         primaryStage.setScene(new Scene(root, 1024, 800));
+        primaryStage.getScene().getStylesheets().add("stylesheet.css");
         primaryStage.show();
         primaryStage.setOnCloseRequest(e -> System.exit(0));
-
     }
 
     public static void main(String[] args) {

@@ -24,7 +24,7 @@ public class Strategy200 extends Strategy {
 	@Override
 	protected Trade tick(Quote quote) {
 
-		System.out.println("Good morning, today is " + quote.getDate() + " have a successfull trading day! ");
+		//System.out.println("Good morning, today is " + quote.getDate() + " have a successfull trading day! ");
 		if(quote.getOpen()> 8000) {
 		//	return new Trade(Trade.Type.BUY, 1);
 		}else if(quote.getOpen()<1000) {
