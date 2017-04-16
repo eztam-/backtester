@@ -26,9 +26,9 @@ public class Strategy200 extends Strategy {
 
 		System.out.println("Good morning, today is " + quote.getDate() + " have a successfull trading day! ");
 		if(quote.getOpen()> 8000) {
-			return new Trade(Trade.Type.BUY, 1);
+		//	return new Trade(Trade.Type.BUY, 1);
 		}else if(quote.getOpen()<1000) {
-			return new Trade(Trade.Type.SELL, 1);
+		//	return new Trade(Trade.Type.SELL, 1);
 		}
 
 		return null;

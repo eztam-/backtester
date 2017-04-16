@@ -1,6 +1,7 @@
 package com.early_reflections;
 
 import com.early_reflections.json.Quote;
+import com.early_reflections.json.YahooData;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
