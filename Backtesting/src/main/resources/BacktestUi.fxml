@@ -1,44 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.chart.ValueAxis?>
-<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.AreaChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.text.Font?>
+<?import com.early_reflections.ui.AwesomeIcons?>
 
-<SplitPane dividerPositions="0.5, 0.5" orientation="VERTICAL" prefHeight="446.0" prefWidth="502.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.early_reflections.ui.Controller">
+<SplitPane dividerPositions="0.09684684684684684, 0.7207207207207207" orientation="VERTICAL" prefHeight="446.0" prefWidth="502.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.early_reflections.ui.Controller">
    <items>
       <ToolBar prefHeight="40.0" prefWidth="200.0">
         <items>
-            <Button fx:id="playButton" mnemonicParsing="false" text="play" />
-            <Button fx:id="pauseButton" mnemonicParsing="false" text="pause" />
-            <Button fx:id="stopButton" mnemonicParsing="false" text="stop" />
+            <Button fx:id="playButton" mnemonicParsing="false" >
+                <text>
+                    <AwesomeIcons fx:constant="ICON_PLAY"/>
+                </text>
+               <font>
+                  <Font name="FontAwesome" size="14.0" />
+               </font>
+            </Button>
+            <Button fx:id="pauseButton" mnemonicParsing="false">
+                <text>
+                    <AwesomeIcons fx:constant="ICON_PAUSE"/>
+                </text>
+                <font>
+                    <Font name="FontAwesome" size="14.0" />
+                </font>
+            </Button>
+            <Button fx:id="stopButton" mnemonicParsing="false" >
+                <text>
+                    <AwesomeIcons fx:constant="ICON_STOP"/>
+                </text>
+                <font>
+                    <Font name="FontAwesome" size="14.0" />
+                </font>
+            </Button>
             <Label text="Speed" />
             <Slider fx:id="speedSlider" />
         </items>
       </ToolBar>
       <!-- Quotes chart -->
-      <LineChart fx:id="quotesChart" animated="false" createSymbols="false" legendVisible="false" styleClass="quotes-chart">
+      <AreaChart fx:id="quotesChart" animated="false" createSymbols="false" legendVisible="false" styleClass="quotes-chart">
         <xAxis>
           <NumberAxis side="BOTTOM" />
         </xAxis>
         <yAxis>
           <NumberAxis side="LEFT" />
         </yAxis>
-      </LineChart>
+      </AreaChart>
 
       <!-- Balance chart-->
-      <LineChart fx:id="balanceChart" animated="false" createSymbols="false" legendVisible="false" styleClass="balance-chart">
+      <AreaChart fx:id="balanceChart" animated="false" createSymbols="false" legendVisible="false" minHeight="120.0" prefHeight="160.0" styleClass="balance-chart">
          <xAxis>
             <NumberAxis side="BOTTOM" />
          </xAxis>
          <yAxis>
             <NumberAxis side="LEFT" />
          </yAxis>
-      </LineChart>
+      </AreaChart>
 
    </items>
 </SplitPane>

@@ -32,10 +32,10 @@ import java.util.*;
 public class Controller implements Initializable {
 
     @FXML
-    private LineChart<Number,Number> quotesChart;
+    private AreaChart<Number,Number> quotesChart;
 
     @FXML
-    private LineChart<Number,Number> balanceChart;
+    private AreaChart<Number,Number> balanceChart;
 
     @FXML
     private Button playButton;
