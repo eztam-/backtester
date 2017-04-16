@@ -41,7 +41,7 @@ public class Strategy200 extends Strategy {
         }
 
         if(last60 > last200 && seconLast60 < seconLast200) {
-		    return new Trade(Trade.Type.BUY, 1);
+		    return new Trade(Trade.Type.BUY, getMaxQuantity(quote));
 		}else if(last60 < last200 && seconLast60 > seconLast200) {
             int numShares = Broker.instance().getHoldings();
 			return new Trade(Trade.Type.SELL, numShares);
@@ -49,4 +49,20 @@ public class Strategy200 extends Strategy {
 
 		return null;
 	}
+
+    public int getMaxQuantity(Quote quote) {
+        double cash = Broker.instance().getCash();
+
+        Double price = quote.getOpen();
+
+        int maxQty =0;
+        for(; maxQty*price<cash; maxQty++){
+
+        }
+        if(maxQty>0){
+            maxQty--;
+        }
+        return maxQty;
+
+    }
 }

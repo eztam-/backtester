@@ -1,9 +1,6 @@
 package com.early_reflections.ui;
 
-import com.early_reflections.Broker;
-import com.early_reflections.Strategy;
-import com.early_reflections.Strategy200;
-import com.early_reflections.Trade;
+import com.early_reflections.*;
 import com.early_reflections.yahoodata.Quote;
 import com.early_reflections.yahoodata.YahooDataSource;
 import com.google.gson.Gson;
@@ -58,6 +55,7 @@ public class Controller implements Initializable {
     private Broker broker =  Broker.instance();
 
     private Strategy strategy = new Strategy200();
+   // private Strategy strategy = new StrategyBuyAndHold();
     private IndicatorSeries indicatorHandler;
 
     private int tickSleepMs = 0; // TODO volatile??

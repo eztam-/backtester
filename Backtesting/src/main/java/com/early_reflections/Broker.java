@@ -24,15 +24,17 @@ public class Broker {
         double sum = quote.getOpen() * trade.getQuantity();
         if(trade.isBuy()){
             if(sum > balance){
-                return ;
                 // TODO
+                System.out.println("Account limit exceeded");
                // throw new BrokerException("Account limit exceeded");
+                return ;
             }
             holdings+=trade.getQuantity();
             balance-=sum;
         }
         else if(trade.isSell()){
             if(trade.getQuantity()>holdings){
+                System.out.println("Cannot sell more shares than available");
                 return ;
                 // TODO
               // throw new BrokerException("Cannot sell more shares than available");
@@ -60,5 +62,8 @@ public class Broker {
 
     public int getHoldings() {
         return holdings;
+    }
+    public double getCash() {
+        return balance;
     }
 }
