@@ -32,10 +32,10 @@ import java.util.*;
 public class Controller implements Initializable {
 
     @FXML
-    private AreaChart<Number,Number> quotesChart;
+    private AreaChart<Number, Number> quotesChart;
 
     @FXML
-    private AreaChart<Number,Number> balanceChart;
+    private AreaChart<Number, Number> balanceChart;
 
     @FXML
     private Button playButton;
@@ -63,25 +63,11 @@ public class Controller implements Initializable {
 
     public Collection getBalanceChartData() {
         List<XYChart.Data> balance = new ArrayList<>();
-        for(int i=0; i<balanceData.size(); i++){
+        for (int i = 0; i < balanceData.size(); i++) {
             XYChart.Data b = new XYChart.Data(i, balanceData.get(i));
             balance.add(b);
         }
         return balance;
-    }
-
-    public class ChartQuote  {
-        double value;
-        boolean buy, sell;
-        String label;
-        int xAxisId;
-
-        ChartQuote(Quote quote, Trade trade){
-            value = quote.getOpen();
-            buy = trade.isBuy();
-            sell = trade.isSell();
-            label = quote.getDate().toString();
-        }
     }
 
     @Override
@@ -101,31 +87,31 @@ public class Controller implements Initializable {
     }
 
     private void startBacktest(ActionEvent event) {
+        System.out.println("11111");
         new Thread(task).start();
         task.setOnSucceeded(evt -> System.out.println("Task succeeded!"));
         task.setOnCancelled(evt -> System.out.println("Task cancelled!"));
         task.setOnFailed(evt -> {
             if (task.getException() instanceof Broker.BrokerException) {
-                System.out.println("Broker error: "+task.getException().getMessage());
-            }
-            else{
+                System.out.println("Broker error: " + task.getException().getMessage());
+            } else {
                 task.getException().printStackTrace();
             }
         });
     }
 
 
-    // TODO extract this to MVC pattern
     Task<Integer> task = new Task<Integer>() {
+
         @Override
         protected Integer call() throws InterruptedException {
-
+            System.out.println("######");
             // Updating the chart periodically after some time is much more performant than updating on each new data
             Timeline periodicChartUpdater = new Timeline(new KeyFrame(Duration.millis(100), event -> {
-               if(quotes.size()!=quoteSeries.getData().size()){ // If chart data has changed
-                   quoteSeries.getData().setAll(getQuoteChartData());
-                   balanceSeries.getData().setAll(getBalanceChartData());
-               }
+                if (quotes.size() != quoteSeries.getData().size()) { // If chart data has changed
+                    quoteSeries.getData().setAll(getQuoteChartData());
+                    balanceSeries.getData().setAll(getBalanceChartData());
+                }
             }));
             periodicChartUpdater.setCycleCount(Timeline.INDEFINITE);
             periodicChartUpdater.play();
@@ -137,7 +123,7 @@ public class Controller implements Initializable {
                     break;
                 }
                 Thread.sleep(tickSleepMs); // TODO make this configurable in UI via slider
-                final Trade trade =  strategy.processTick(q);
+                final Trade trade = strategy.processTick(q);
                 broker.trade(trade, q);
                 final double accountWorth = broker.getAccountWorth(q);
 
@@ -151,34 +137,16 @@ public class Controller implements Initializable {
 
 
     private void updateChartData(double accountWorth, Quote q, Trade trade) {
-            quotes.add(new ChartQuote(q,trade));
-            balanceData.add(accountWorth);
+        quotes.add(new ChartQuote(q, trade));
+        balanceData.add(accountWorth); // TODO performance could be improved by only adding balance data on change and not for each tick
     }
-
-
-    class XAxisLabelConverter extends StringConverter<Number> {
-
-        @Override
-        public String toString(Number object) {
-                if(object.intValue()<quotes.size()) {
-                    return quotes.get(object.intValue()).label;
-                }
-                return "";
-        }
-
-        @Override
-        public Number fromString(String string) {
-            return null;
-        }
-    }
-
 
     private List<XYChart.Data> getQuoteChartData() {
         List<XYChart.Data> chartData = new ArrayList<>();
-        int xAxisId =0;
-        for(int i=0; i< quotes.size(); i++){
+        int xAxisId = 0;
+        for (int i = 0; i < quotes.size(); i++) {
             ChartQuote chartQuote = quotes.get(i);
-            chartQuote.xAxisId=xAxisId++;
+            chartQuote.xAxisId = xAxisId++;
             XYChart.Data data = new XYChart.Data(chartQuote.xAxisId, chartQuote.value);
             addTradeNode(data, chartQuote.buy, chartQuote.sell);
             chartData.add(data);
@@ -190,8 +158,8 @@ public class Controller implements Initializable {
     private List<Quote> fetchData(String symbol) {
         try {
             File file = new File("^GDAXI.json");
-            if(!file.exists() ){
-                LOG.debug("No data file for symbol "+symbol+" found. Downloading it from internet.");
+            if (!file.exists()) {
+                LOG.debug("No data file for symbol " + symbol + " found. Downloading it from internet.");
                 // TODO show ui progress bar
                 YahooDataSource t = new YahooDataSource();
                 List<Quote> quotes = t.fetchHistoricQuotes("^GDAXI"); // TODO move this old stuff to separate class
@@ -200,7 +168,7 @@ public class Controller implements Initializable {
             FileReader reader = new FileReader(file);
             Quote[] q = new Gson().fromJson(reader, Quote[].class);
             reader.close();
-            return  Arrays.asList(q);
+            return Arrays.asList(q);
         } catch (IOException e) {
             throw new UiException("Error! Cannot read or write data file.");
         }
@@ -210,13 +178,43 @@ public class Controller implements Initializable {
     /**
      * Adds the buy or sell nodes to the chart data if a trade was performed
      */
-    private void addTradeNode(XYChart.Data data,boolean buy, boolean sell) {
+    private void addTradeNode(XYChart.Data data, boolean buy, boolean sell) {
         // TODO add something more eye cyndy
-        if( buy){
+        if (buy) {
             data.setNode(new Circle(6, Color.GREEN));
-        }
-        else if( sell){
+        } else if (sell) {
             data.setNode(new Circle(6, Color.RED));
+        }
+    }
+
+
+    public class ChartQuote {
+        double value;
+        boolean buy, sell;
+        String label;
+        int xAxisId;
+
+        ChartQuote(Quote quote, Trade trade) {
+            value = quote.getOpen();
+            buy = trade.isBuy();
+            sell = trade.isSell();
+            label = quote.getDate().toString();
+        }
+    }
+
+    class XAxisLabelConverter extends StringConverter<Number> {
+
+        @Override
+        public String toString(Number object) {
+            if (object.intValue() < quotes.size()) {
+                return quotes.get(object.intValue()).label;
+            }
+            return "";
+        }
+
+        @Override
+        public Number fromString(String string) {
+            return null;
         }
     }
 

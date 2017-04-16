@@ -7,18 +7,17 @@
 .default-color1.chart-area-symbol { -fx-background-color: #f0e68c, #fffacd; }
 .default-color2.chart-area-symbol { -fx-background-color: #dda0dd, #d8bfd855; }
 
-.default-color0.chart-series-area-line { -fx-stroke: #3ffa32; }
+.default-color0.chart-series-area-line { -fx-stroke: rgba(63, 250, 50, 1); }
 .default-color1.chart-series-area-line { -fx-stroke: #f0e68c; }
 .default-color2.chart-series-area-line { -fx-stroke: #dda0dd; }
 
-.default-color0.chart-series-area-fill { -fx-fill: rgba(63, 250, 50, 0.12); }
+.default-color0.chart-series-area-fill { -fx-fill: rgba(58, 250, 47, 0.12); }
 .default-color1.chart-series-area-fill { -fx-fill: #fffacd55; }
 .default-color2.chart-series-area-fill { -fx-fill: #d8bfd855; }
 
 
 .chart {
-    -fx-padding: 10px;
-    -fx-background-color: rgba(10, 18, 35, 0.65);
+    -fx-background-color: rgb(104, 112, 117);
 }
 
 .chart-plot-background {
@@ -26,7 +25,7 @@
 }
 
 .axis {
-    -fx-tick-label-fill: rgb(166, 163, 163);
+    -fx-tick-label-fill: rgb(226, 223, 223);
 }
 
 .chart-vertical-grid-lines {
@@ -41,12 +40,3 @@
 .balance-chart .default-color0.chart-series-area-line { -fx-stroke: #1d91fa; }
 .balance-chart .default-color0.chart-series-area-fill { -fx-fill: rgba(91, 194, 250, 0.4); }
 
-
-
-/* Buttons */
-.icons{
-    -fx-font-family: FontAwesome;
-    -fx-font-size: 16px;
-    -fx-effect: innershadow( three-pass-box , derive(-icons-color,-70%) , 0.1em, 0.0 , 0.07em, 0.07em );
-    -fx-text-fill: linear-gradient(to bottom, derive(-icons-color,20%) 10%, derive(-icons-color,-40%) 80%);
-}
