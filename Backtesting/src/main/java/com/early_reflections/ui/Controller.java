@@ -1,7 +1,12 @@
-package com.early_reflections;
+package com.early_reflections.ui;
 
+import com.early_reflections.Broker;
+import com.early_reflections.Strategy;
+import com.early_reflections.Strategy200;
+import com.early_reflections.Trade;
 import com.early_reflections.yahoodata.Quote;
 import com.early_reflections.yahoodata.YahooDataSource;
+import com.google.gson.Gson;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -13,8 +18,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.*;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -44,6 +55,7 @@ public class Controller implements Initializable {
 
     private Strategy strategy = new Strategy200();
     private int tickSleepMs = 0; // TODO volatile??
+    private final static Logger LOG = LoggerFactory.getLogger(YahooDataSource.class);
 
 
     @Override
@@ -83,8 +95,8 @@ public class Controller implements Initializable {
         @Override
         protected Integer call() throws InterruptedException {
 
-            YahooDataSource t = new YahooDataSource();
-            List<Quote> quotes = t.fetchHistoricQuotes(); // TODO move this old stuff to separate class
+
+            List<Quote> quotes = fetchData("^DAXI");
 
             for (final Quote q : quotes) {
                 if (isCancelled()) { // TODO ad cancel button in UI
@@ -96,21 +108,36 @@ public class Controller implements Initializable {
                 final double accountWorth = broker.getAccountWorth(q);
 
                 // TODO performance could be improved by adding the data block wise to the chart (collect and add every 100ms or so). Do this avter extracted the MVC pattern
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        XYChart.Data quoteData = new XYChart.Data(q.getDate().toString(), q.getOpen());
-                        addTradeNode(quoteData, trade);
-                        quoteSeries.getData().add(quoteData);
+                Platform.runLater(() -> {
+                    XYChart.Data quoteData = new XYChart.Data(q.getDate().toString(), q.getOpen());
+                    addTradeNode(quoteData, trade);
+                    quoteSeries.getData().add(quoteData);
 
-                        XYChart.Data balanceData = new XYChart.Data(q.getDate().toString(), accountWorth);
-                        balanceSeries.getData().add(balanceData);
-                    }
+                    XYChart.Data balanceData = new XYChart.Data(q.getDate().toString(), accountWorth);
+                    balanceSeries.getData().add(balanceData);
                 });
             }
             return 0;
         }
     };
+
+    private List<Quote> fetchData(String symbol) {
+        try {
+            File file = new File("^GDAXI.json");
+            if(!file.exists() ){
+                LOG.debug("No data file for symbol "+symbol+" found. Downloading it from internet.");
+                YahooDataSource t = new YahooDataSource();
+                List<Quote> quotes = t.fetchHistoricQuotes("^GDAXI"); // TODO move this old stuff to separate class
+                FileUtils.writeStringToFile(file, new Gson().toJson(quotes));
+            }
+            FileReader reader = new FileReader(file);
+            Quote[] q = new Gson().fromJson(reader, Quote[].class);
+            reader.close();
+            return  Arrays.asList(q);
+        } catch (IOException e) {
+            throw new UiException("Error! Cannot read or write data file.");
+        }
+    }
 
 
     /**

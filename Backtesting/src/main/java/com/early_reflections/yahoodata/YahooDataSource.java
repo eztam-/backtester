@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import com.early_reflections.ui.UiException;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -26,21 +27,11 @@ public class YahooDataSource {
 
     private final static Logger LOG = LoggerFactory.getLogger(YahooDataSource.class);
 
-    public class DataFetchException extends RuntimeException {
-        public DataFetchException() {
-            super("Error while fetching quotes from server");
-        }
-
-        public DataFetchException(Exception e) {
-            super("Error while fetching quotes from server", e);
-        }
-    }
-
-    public List<Quote> fetchHistoricQuotes() {
+    public List<Quote> fetchHistoricQuotes(String symbol) {
         List<Quote> quotes = new LinkedList<>();
         int year = new LocalDate().getYear();
         for (int i = 0; i < 100; i++) {
-            List<Quote> q = fetchQuotes(year);
+            List<Quote> q = fetchQuotes(year, symbol);
             if (q == null) {
                 LOG.debug("No older data than " + year + " is available. Stopping here");
                 break;
@@ -53,28 +44,28 @@ public class YahooDataSource {
     }
 
 
-    private List<Quote> fetchQuotes(int year) {
+    private List<Quote> fetchQuotes(int year, String symbol) {
         LOG.debug("Fetching data for year: " + year);
         LocalDate from = new LocalDate(year, 1, 1);
         LocalDate to = from.dayOfYear().withMaximumValue();
         if (to.getYear() == new LocalDate().getYear()) {
             to = new LocalDate();
         }
-        return fetchQuotes(from, to);
+        return fetchQuotes(from, to, symbol);
     }
 
     /**
      * Maximum range between from and to is 1 year
      */
-    private List<Quote> fetchQuotes(LocalDate from, LocalDate to) {
+    private List<Quote> fetchQuotes(LocalDate from, LocalDate to, String symbol) {
         try {
-            URI uri = buildQuery(from, to);
+            URI uri = buildQuery(from, to, symbol);
             HttpGet httpget = new HttpGet(uri);
             CloseableHttpClient httpClient = HttpClients.createDefault();
             CloseableHttpResponse response = httpClient.execute(httpget);
             HttpEntity entity = response.getEntity();
             if (entity == null) {
-                throw new DataFetchException();
+                throw new UiException("Error while fetching quotes from server");
             }
             InputStreamReader reader = new InputStreamReader(entity.getContent());
             JsonElement results = new Gson().fromJson(reader, JsonObject.class).getAsJsonObject("query").get("results");
@@ -88,18 +79,18 @@ public class YahooDataSource {
             return Arrays.asList(q);
 
         } catch (URISyntaxException | IOException e) {
-            throw new DataFetchException(e);
+            throw new UiException("Error while fetching quotes from server",e);
         }
     }
 
-    private URI buildQuery(LocalDate from, LocalDate to) throws URISyntaxException {
+    private URI buildQuery(LocalDate from, LocalDate to, String symbol) throws URISyntaxException {
         String toStr = toDateString(to);
         String fromStr = toDateString(from);
         return new URIBuilder()//
                 .setScheme("http")//
                 .setHost("query.yahooapis.com")//
                 .setPath("/v1/public/yql")//
-                .setParameter("q", "select * from yahoo.finance.historicaldata where symbol = \"^GDAXI\" and startDate = \""
+                .setParameter("q", "select * from yahoo.finance.historicaldata where symbol = \""+symbol+"\" and startDate = \""
                         + fromStr + "\" and endDate = \"" + toStr + "\"")//
                 .setParameter("format", "json")//
                 .setParameter("env", "store://datatables.org/alltableswithkeys")//

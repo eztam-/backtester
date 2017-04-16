@@ -1,4 +1,4 @@
-package com.early_reflections;
+package com.early_reflections.ui;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -13,9 +13,11 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         // TODO this should also work without getClassloader??
         Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("BacktestUi.fxml"));
-        primaryStage.setTitle("Hello World");
-        primaryStage.setScene(new Scene(root, 300, 275));
+        primaryStage.setTitle("Backtester");
+        primaryStage.setScene(new Scene(root, 1024, 800));
         primaryStage.show();
+        primaryStage.setOnCloseRequest(e -> System.exit(0));
+
     }
 
     public static void main(String[] args) {
