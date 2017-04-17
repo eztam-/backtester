@@ -11,17 +11,28 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
+import javafx.geometry.VPos;
+import javafx.scene.Group;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.java2d.loops.FillRect;
 
 import java.io.*;
 import java.net.URL;
@@ -140,7 +151,7 @@ public class Controller implements Initializable {
             ChartQuote chartQuote = quotes.get(i);
             chartQuote.xAxisId = xAxisId++;
             XYChart.Data data = new XYChart.Data(chartQuote.xAxisId, chartQuote.value);
-            addTradeNode(data, chartQuote.buy, chartQuote.sell);
+            addTradeNode(data, chartQuote.trade);
             chartData.add(data);
         }
         return chartData;
@@ -178,35 +189,62 @@ public class Controller implements Initializable {
     /**
      * Adds the buy or sell nodes to the chart data if a trade was performed
      */
-    private void addTradeNode(XYChart.Data data, boolean buy, boolean sell) {
+    private void addTradeNode(XYChart.Data data, Trade trade) {
         // TODO add something more eye cyndy
 
-        if (buy) {
+        if (trade.isBuy()) {
+
+
+        /*
+            Canvas canvas = new Canvas(51, 113);
+            GraphicsContext gc = canvas.getGraphicsContext2D();
+            gc.setStroke(Color.WHITE);
+            gc.setGlobalAlpha(0.5);
+            gc.strokeLine(26,13,26,113);
+            gc.setStroke(Color.ORANGE);
+            gc.setFill(Color.ORANGE);
+            gc.setGlobalAlpha(1);
+            gc.fillOval(23,12,6,6);
+            gc.setTextAlign(TextAlignment.CENTER);
+            gc.setTextBaseline(VPos.TOP);
+            gc.setFont(Font.font(Font.getDefault().getFamily(), FontWeight.EXTRA_LIGHT, 9));
+            gc.setStroke(null);
+            gc.fillText(
+                    "288",
+                    Math.round(canvas.getWidth()  / 2),
+                   0
+            );
+            data.setNode(canvas);
+        */
+
+            Group group = new Group();
             Line line = new Line(0,0,0,100);
-            //line.getStrokeDashArray().addAll(2d);
-            line.setStroke(Color.YELLOWGREEN);
-            //line.setOpacity(0.5);
-            data.setNode(line);
-        } else if (sell) {
+            line.setOpacity(0.5);
+            line.setStroke(Color.WHITE);
+            group.getChildren().add(line);
+            group.getChildren().add(new Circle(3,Color.LAWNGREEN));
+            data.setNode(group);
+        } else if (trade.isSell()) {
+            Group group = new Group();
             Line line = new Line(0,0,0,100);
-           // line.getStrokeDashArray().addAll(2d);
-            line.setStroke(Color.RED);
-           // line.setOpacity(0.5);
-            data.setNode(line);
+            line.setOpacity(0.5);
+            line.setStroke(Color.WHITE);
+            group.getChildren().add(line);
+            group.getChildren().add(new Circle(3,Color.ORANGERED));
+            data.setNode(group);
         }
     }
 
 
     public class ChartQuote {
         double value;
-        boolean buy, sell;
         String label;
         int xAxisId;
+        Trade trade;
 
         ChartQuote(Quote quote, Trade trade) {
             value = quote.getOpen();
-            buy = trade.isBuy();
-            sell = trade.isSell();
+            this.trade = trade;
             label = quote.getDate().toString();
         }
     }

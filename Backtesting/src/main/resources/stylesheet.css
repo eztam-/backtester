@@ -14,8 +14,7 @@
 .default-color0.chart-series-area-fill { -fx-fill: rgba(58, 250, 47, 0.12); }
 .default-color1.chart-series-area-fill { -fx-fill: none; }
 .default-color2.chart-series-area-fill { -fx-fill: none; }
-.default-color3.chart-series-area-fill { -fx-fill: none; }
-.default-color4.chart-series-area-fill { -fx-fill: none; }
+
 
 .chart {
     -fx-background-color: rgb(104, 112, 117);
@@ -40,4 +39,5 @@
 /* Balance chart */
 .balance-chart .default-color0.chart-series-area-line { -fx-stroke: #1d91fa; }
 .balance-chart .default-color0.chart-series-area-fill { -fx-fill: rgba(91, 194, 250, 0.4); }
+
 
