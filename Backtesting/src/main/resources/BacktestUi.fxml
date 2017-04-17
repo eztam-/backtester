@@ -10,6 +10,7 @@
 <?import javafx.scene.text.Font?>
 <?import com.early_reflections.ui.AwesomeIcons?>
 
+<?import com.early_reflections.ui.Chart?>
 <SplitPane dividerPositions="0.09684684684684684, 0.7207207207207207" orientation="VERTICAL" prefHeight="446.0" prefWidth="502.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.early_reflections.ui.Controller">
    <items>
       <ToolBar prefHeight="40.0" prefWidth="200.0">
@@ -43,14 +44,14 @@
         </items>
       </ToolBar>
       <!-- Quotes chart -->
-      <AreaChart fx:id="quotesChart" animated="false" createSymbols="false" legendVisible="false" styleClass="quotes-chart">
+      <Chart fx:id="quotesChart" animated="false" createSymbols="false" legendVisible="false" styleClass="quotes-chart">
         <xAxis>
           <NumberAxis side="BOTTOM" />
         </xAxis>
         <yAxis>
           <NumberAxis side="LEFT" />
         </yAxis>
-      </AreaChart>
+      </Chart>
 
       <!-- Balance chart-->
       <AreaChart fx:id="balanceChart" animated="false" createSymbols="false" legendVisible="false" minHeight="120.0" prefHeight="160.0" styleClass="balance-chart">

@@ -5,34 +5,21 @@ import com.early_reflections.yahoodata.Quote;
 import com.early_reflections.yahoodata.YahooDataSource;
 import com.google.gson.Gson;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Group;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
-import javafx.util.Duration;
 import javafx.util.StringConverter;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.java2d.loops.FillRect;
 
 import java.io.*;
 import java.net.URL;
@@ -41,7 +28,7 @@ import java.util.*;
 public class Controller implements Initializable {
 
     @FXML
-    private AreaChart<Number, Number> quotesChart;
+    private Chart quotesChart;
 
     @FXML
     private AreaChart<Number, Number> balanceChart;
@@ -107,18 +94,17 @@ public class Controller implements Initializable {
 
         @Override
         protected Integer call() throws InterruptedException {
-            // Updating the chart periodically after some time is much more performant than updating on each new data
-            Timeline periodicChartUpdater = new Timeline(new KeyFrame(Duration.millis(100), event -> {
-                // TODO with fast speed, this lead to problems because of overlapping executions. Ensure to not run a new execution until the previous has not been finished
-                if (quotes.size() != quoteSeries.getData().size()) { // If chart data has changed
-                    quoteSeries.getData().setAll(getQuoteChartData());
-                    balanceSeries.getData().setAll(getBalanceChartData());
-                    indicatorHandler.updateChart();
-                }
-            }));
-            periodicChartUpdater.setCycleCount(Timeline.INDEFINITE);
-            periodicChartUpdater.play();
 
+            quotesChart.startPeriodicUpdate(() -> {
+                if (quotes.size() == quoteSeries.getData().size()) { // If chart data has changed
+                    return false;
+                }
+                // TODO Do only add changed data with addAll instead of updating the whole chart each time!
+                quoteSeries.getData().setAll(getQuoteChartData());
+                balanceSeries.getData().setAll(getBalanceChartData());
+                indicatorHandler.updateChart();
+                return true;
+            });
 
             List<Quote> quotes = fetchData("^GDAXI");
             for (final Quote q : quotes) {
@@ -133,7 +119,7 @@ public class Controller implements Initializable {
                 updateChartData(accountWorth, q, trade);
 
             }
-            periodicChartUpdater.setCycleCount(1); // Run one last time and update the result
+            quotesChart.stopUpdating();
             return 0;
         }
     };
@@ -157,7 +143,7 @@ public class Controller implements Initializable {
         return chartData;
     }
 
-    public Collection getBalanceChartData() {
+    public List<XYChart.Data> getBalanceChartData() {
         List<XYChart.Data> balance = new ArrayList<>();
         for (int i = 0; i < balanceData.size(); i++) {
             XYChart.Data b = new XYChart.Data(i, balanceData.get(i));
