@@ -16,6 +16,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import org.apache.commons.io.FileUtils;
@@ -61,15 +62,6 @@ public class Controller implements Initializable {
     private int tickSleepMs = 0; // TODO volatile??
     private final static Logger LOG = LoggerFactory.getLogger(YahooDataSource.class);
 
-    public Collection getBalanceChartData() {
-        List<XYChart.Data> balance = new ArrayList<>();
-        for (int i = 0; i < balanceData.size(); i++) {
-            XYChart.Data b = new XYChart.Data(i, balanceData.get(i));
-            balance.add(b);
-        }
-        return balance;
-    }
-
     @Override
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         quotesChart.getData().add(quoteSeries);
@@ -106,6 +98,7 @@ public class Controller implements Initializable {
         protected Integer call() throws InterruptedException {
             // Updating the chart periodically after some time is much more performant than updating on each new data
             Timeline periodicChartUpdater = new Timeline(new KeyFrame(Duration.millis(100), event -> {
+                // TODO with fast speed, this lead to problems because of overlapping executions. Ensure to not run a new execution until the previous has not been finished
                 if (quotes.size() != quoteSeries.getData().size()) { // If chart data has changed
                     quoteSeries.getData().setAll(getQuoteChartData());
                     balanceSeries.getData().setAll(getBalanceChartData());
@@ -116,7 +109,7 @@ public class Controller implements Initializable {
             periodicChartUpdater.play();
 
 
-            List<Quote> quotes = fetchData("^DAXI");
+            List<Quote> quotes = fetchData("^GDAXI");
             for (final Quote q : quotes) {
                 if (isCancelled()) {
                     break;
@@ -153,6 +146,14 @@ public class Controller implements Initializable {
         return chartData;
     }
 
+    public Collection getBalanceChartData() {
+        List<XYChart.Data> balance = new ArrayList<>();
+        for (int i = 0; i < balanceData.size(); i++) {
+            XYChart.Data b = new XYChart.Data(i, balanceData.get(i));
+            balance.add(b);
+        }
+        return balance;
+    }
 
     private List<Quote> fetchData(String symbol) {
         try {
@@ -179,10 +180,19 @@ public class Controller implements Initializable {
      */
     private void addTradeNode(XYChart.Data data, boolean buy, boolean sell) {
         // TODO add something more eye cyndy
+
         if (buy) {
-            data.setNode(new Circle(6, Color.GREEN));
+            Line line = new Line(0,0,0,100);
+            //line.getStrokeDashArray().addAll(2d);
+            line.setStroke(Color.YELLOWGREEN);
+            //line.setOpacity(0.5);
+            data.setNode(line);
         } else if (sell) {
-            data.setNode(new Circle(6, Color.RED));
+            Line line = new Line(0,0,0,100);
+           // line.getStrokeDashArray().addAll(2d);
+            line.setStroke(Color.RED);
+           // line.setOpacity(0.5);
+            data.setNode(line);
         }
     }
 
