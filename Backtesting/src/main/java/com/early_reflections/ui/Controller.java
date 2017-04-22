@@ -55,12 +55,12 @@ public class Controller implements Initializable {
     private XYChart.Series balanceSeries = new XYChart.Series();
 
     private List<ChartQuote> quotes = new ArrayList<>();
-    private List<Double> balanceData = new ArrayList<>();
+    private List<ChartBalance> balanceData = new ArrayList<>();
 
-    private Broker broker =  Broker.instance();
+    private Broker broker = Broker.instance();
 
     private Strategy strategy = new Strategy200();
-   // private Strategy strategy = new StrategyBuyAndHold();
+    // private Strategy strategy = new StrategyBuyAndHold();
     private IndicatorSeries indicatorHandler;
 
     private int tickSleepMs = 0; // TODO volatile??
@@ -72,8 +72,14 @@ public class Controller implements Initializable {
         balanceChart.getData().add(balanceSeries);
         indicatorHandler = new IndicatorSeries(strategy, quotesChart);
         ((NumberAxis) quotesChart.getXAxis()).setTickLabelFormatter(new XAxisLabelConverter());
+        ((NumberAxis) balanceChart.getXAxis()).setTickLabelFormatter(new XAxisLabelConverter());
+
         ((NumberAxis) quotesChart.getXAxis()).setForceZeroInRange(false);
-        quotesChart.getXAxis().setAutoRanging(false);
+        ((NumberAxis) balanceChart.getXAxis()).setForceZeroInRange(false);
+        // quotesChart.getXAxis().setAutoRanging(false);
+
+        // TODO Disable autoranging and set upper and lower bounds manually in order to keep both charts
+        // in sync and have no gaps at the beginning and end
 
 
         playButton.setOnAction(event -> startBacktest(event));
@@ -113,16 +119,17 @@ public class Controller implements Initializable {
                 quoteSeries.getData().setAll(getQuoteChartData());
                 balanceSeries.getData().setAll(getBalanceChartData());
                 indicatorHandler.updateChart();
-           // quotesChart.getXAxis().setAutoRanging(true);
+                // quotesChart.getXAxis().setAutoRanging(true);
                 return true;
             });
 
             List<Quote> quotes = fetchData("^GDAXI");
 
-            long first = quotes.get(0).getDate().toDateTimeAtStartOfDay().getMillis();
+          /*  long first = quotes.get(0).getDate().toDateTimeAtStartOfDay().getMillis();
             long last = quotes.get(quotes.size()-1).getDate().toDateTimeAtStartOfDay().getMillis();
              ((NumberAxis) quotesChart.getXAxis()).setLowerBound(first);
             ((NumberAxis) quotesChart.getXAxis()).setUpperBound(last);
+            */
             for (final Quote q : quotes) {
                 if (isCancelled()) {
                     break;
@@ -132,7 +139,7 @@ public class Controller implements Initializable {
                 broker.trade(trade, q);
                 final double accountWorth = broker.getAccountWorth(q);
 
-               // s1.add( new Day(q.getDate().toDate()), q.getOpen()); // TODO Amend performance by adding the values blockwise
+                // s1.add( new Day(q.getDate().toDate()), q.getOpen()); // TODO Amend performance by adding the values blockwise
 
                 updateChartData(accountWorth, q, trade);
 
@@ -145,7 +152,7 @@ public class Controller implements Initializable {
 
     private void updateChartData(double accountWorth, Quote q, Trade trade) {
         quotes.add(new ChartQuote(q, trade));
-        balanceData.add(accountWorth); // TODO performance could be improved by only adding balance data on change and not for each tick
+        balanceData.add(new ChartBalance(accountWorth, q.getDate()));
     }
 
     private List<XYChart.Data> getQuoteChartData() {
@@ -153,8 +160,6 @@ public class Controller implements Initializable {
         int xAxisId = 0;
         for (int i = 0; i < quotes.size(); i++) {
             ChartQuote chartQuote = quotes.get(i);
-
-            //chartQuote.xAxisId = xAxisId++;
             XYChart.Data data = new XYChart.Data(chartQuote.xAxisId, chartQuote.value);
             addTradeNode(data, chartQuote.trade);
             chartData.add(data);
@@ -165,7 +170,8 @@ public class Controller implements Initializable {
     public List<XYChart.Data> getBalanceChartData() {
         List<XYChart.Data> balance = new ArrayList<>();
         for (int i = 0; i < balanceData.size(); i++) {
-            XYChart.Data b = new XYChart.Data(i, balanceData.get(i));
+            ChartBalance a = balanceData.get(i);
+            XYChart.Data b = new XYChart.Data(a.xAxisId, a.value);
             balance.add(b);
         }
         return balance;
@@ -223,41 +229,47 @@ public class Controller implements Initializable {
         */
 
             Group group = new Group();
-            Line line = new Line(0,0,0,100);
+            Line line = new Line(0, 0, 0, 100);
             line.setOpacity(0.5);
             line.setStroke(Color.WHITE);
             group.getChildren().add(line);
-            group.getChildren().add(new Circle(3,Color.LAWNGREEN));
+            group.getChildren().add(new Circle(3, Color.LAWNGREEN));
             data.setNode(group);
         } else if (trade.isSell()) {
             Group group = new Group();
-            Line line = new Line(0,0,0,100);
+            Line line = new Line(0, 0, 0, 100);
             line.setOpacity(0.5);
             line.setStroke(Color.WHITE);
             group.getChildren().add(line);
-            group.getChildren().add(new Circle(3,Color.ORANGERED));
+            group.getChildren().add(new Circle(3, Color.ORANGERED));
             data.setNode(group);
         }
     }
 
-long base = 0;
+
     public class ChartQuote {
         double value;
-        String label;
         long xAxisId;
         Trade trade;
 
         ChartQuote(Quote quote, Trade trade) {
             value = quote.getOpen();
             this.trade = trade;
-            if(base ==0){
-                base = quote.getDate().toDateTimeAtStartOfDay().getMillis();
-            }
-          //  xAxisId = quote.getDate().toDateTimeAtStartOfDay().getMillis() - base; // TODO this is not nice ;-(
-            xAxisId = quote.getDate().toDateTimeAtStartOfDay().getMillis() ; // TODO this is not nice ;-(
-            label = quote.getDate().toString();
+            xAxisId = quote.getDate().toDateTimeAtStartOfDay().getMillis();
         }
     }
+
+
+    private class ChartBalance {
+        double value;
+        long xAxisId;
+
+        ChartBalance(double value, LocalDate date) {
+            this.value = value;
+            xAxisId = date.toDateTimeAtStartOfDay().getMillis();
+        }
+    }
+
 
     class XAxisLabelConverter extends StringConverter<Number> {
 
@@ -271,5 +283,4 @@ long base = 0;
             return null;
         }
     }
-
 }
