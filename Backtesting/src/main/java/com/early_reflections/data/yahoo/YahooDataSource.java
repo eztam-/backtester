@@ -1,10 +1,11 @@
-package com.early_reflections.yahoodata;
+package com.early_reflections.data.yahoo;
 
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import com.early_reflections.Quote;
 import com.early_reflections.ui.UiException;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -28,10 +29,10 @@ public class YahooDataSource {
     private final static Logger LOG = LoggerFactory.getLogger(YahooDataSource.class);
 
     public List<Quote> fetchHistoricQuotes(String symbol) {
-        List<Quote> quotes = new LinkedList<>();
+        List<ExtQuote> quotes = new LinkedList<>();
         int year = new LocalDate().getYear();
         for (int i = 0; i < 100; i++) {
-            List<Quote> q = fetchQuotes(year, symbol);
+            List<ExtQuote> q = fetchQuotes(year, symbol);
             if (q == null) {
                 LOG.debug("No older data than " + year + " is available. Stopping here");
                 break;
@@ -39,12 +40,22 @@ public class YahooDataSource {
             quotes.addAll(q);
             year--;
         }
-        quotes.sort(Comparator.comparing(Quote::getDate));
+        List<Quote> q = convertQuotes(quotes);
+        q.sort(Comparator.comparing(Quote::getDate));
+        return q;
+    }
+
+    // TODO streams
+    private List<com.early_reflections.Quote> convertQuotes(List<ExtQuote> extQuotes) {
+        List<com.early_reflections.Quote> quotes = new ArrayList<>();
+        for(ExtQuote q: extQuotes){
+            quotes.add(new com.early_reflections.Quote(q.getDate(), q.getOpen()));
+        }
         return quotes;
     }
 
 
-    private List<Quote> fetchQuotes(int year, String symbol) {
+    private List<ExtQuote> fetchQuotes(int year, String symbol) {
         LOG.debug("Fetching data for year: " + year);
         LocalDate from = new LocalDate(year, 1, 1);
         LocalDate to = from.dayOfYear().withMaximumValue();
@@ -57,7 +68,7 @@ public class YahooDataSource {
     /**
      * Maximum range between from and to is 1 year
      */
-    private List<Quote> fetchQuotes(LocalDate from, LocalDate to, String symbol) {
+    private List<ExtQuote> fetchQuotes(LocalDate from, LocalDate to, String symbol) {
         try {
             URI uri = buildQuery(from, to, symbol);
             HttpGet httpget = new HttpGet(uri);
@@ -75,7 +86,7 @@ public class YahooDataSource {
                 return null;
             }
             JsonArray quote = results.getAsJsonObject().getAsJsonArray("quote");
-            Quote[] q = new Gson().fromJson(quote, Quote[].class);
+            ExtQuote[] q = new Gson().fromJson(quote, ExtQuote[].class);
             return Arrays.asList(q);
 
         } catch (URISyntaxException | IOException e) {
@@ -98,7 +109,7 @@ public class YahooDataSource {
     }
 
     private static String toDateString(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormat.forPattern(Quote.DATE_FORMAT);
+        DateTimeFormatter formatter = DateTimeFormat.forPattern(ExtQuote.DATE_FORMAT);
         return date.toString(formatter);
     }
 

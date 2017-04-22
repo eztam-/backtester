@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.early_reflections.indicators.Indicator;
-import com.early_reflections.yahoodata.Quote;
+import com.early_reflections.data.yahoo.ExtQuote;
 
 public abstract class Strategy {
 

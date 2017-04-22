@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-import com.early_reflections.yahoodata.Quote;
+import com.early_reflections.Quote;
+import com.early_reflections.data.yahoo.ExtQuote;
 import org.joda.time.LocalDate;
 
 public abstract class Indicator {

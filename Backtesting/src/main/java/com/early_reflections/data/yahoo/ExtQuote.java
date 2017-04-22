@@ -1,4 +1,4 @@
-package com.early_reflections.yahoodata;
+package com.early_reflections.data.yahoo;
 
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -7,7 +7,7 @@ import org.joda.time.format.DateTimeFormatter;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Quote {
+public class ExtQuote {
 
 	public final static String DATE_FORMAT = "yyyy-MM-dd";
 

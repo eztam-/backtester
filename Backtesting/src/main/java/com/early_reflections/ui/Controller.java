@@ -1,8 +1,9 @@
 package com.early_reflections.ui;
 
 import com.early_reflections.*;
-import com.early_reflections.yahoodata.Quote;
-import com.early_reflections.yahoodata.YahooDataSource;
+import com.early_reflections.data.local.LocalDataSource;
+import com.early_reflections.data.yahoo.ExtQuote;
+import com.early_reflections.data.yahoo.YahooDataSource;
 import com.google.gson.Gson;
 
 import javafx.concurrent.Task;
@@ -156,6 +157,7 @@ public class Controller implements Initializable {
             // TODO This could be removed after using manual ranging globally
             // Auto ranging is not working properly fit JavaFX charts. Therefore set the bounds finally so that the chart
             // uses the maximum available space
+            /*
             quotesChart.getXAxis().setAutoRanging(false);
             balanceChart.getXAxis().setAutoRanging(false);
             long first = quotes.get(0).getDate().toDateTimeAtStartOfDay().getMillis();
@@ -164,7 +166,7 @@ public class Controller implements Initializable {
             ((NumberAxis) quotesChart.getXAxis()).setUpperBound(last);
             ((NumberAxis) balanceChart.getXAxis()).setLowerBound(first);
             ((NumberAxis) balanceChart.getXAxis()).setUpperBound(last);
-
+*/
             return 0;
         }
     };
@@ -198,22 +200,21 @@ public class Controller implements Initializable {
     }
 
     private List<Quote> fetchData(String symbol) {
-        try {
-            File file = new File("^GDAXI.json");
-            if (!file.exists()) {
-                LOG.debug("No data file for symbol " + symbol + " found. Downloading it from internet.");
-                // TODO show ui progress bar
-                YahooDataSource t = new YahooDataSource();
-                List<Quote> quotes = t.fetchHistoricQuotes("^GDAXI"); // TODO move this old stuff to separate class
-                FileUtils.writeStringToFile(file, new Gson().toJson(quotes));
-            }
-            FileReader reader = new FileReader(file);
-            Quote[] q = new Gson().fromJson(reader, Quote[].class);
-            reader.close();
-            return Arrays.asList(q);
-        } catch (IOException e) {
-            throw new UiException("Error! Cannot read or write data file.");
+
+        File file = new File("^GDAXI.json");
+        if (!file.exists()) {
+            LOG.debug("No data file for symbol " + symbol + " found. Downloading it from internet.");
+            // TODO show ui progress bar
+            YahooDataSource t = new YahooDataSource();
+            List<Quote> quotes = t.fetchHistoricQuotes("^GDAXI"); // TODO move this old stuff to separate class
+            new LocalDataSource().writeToFile(quotes,file);
+
         }
+      //  FileReader reader = new FileReader(file);
+      //  Quote[] q = new Gson().fromJson(reader, Quote[].class);
+      //  reader.close();
+        List<Quote> q = new LocalDataSource().getFromFile(file);
+        return q;
     }
 
 
@@ -273,7 +274,7 @@ public class Controller implements Initializable {
         Trade trade;
 
         ChartQuote(Quote quote, Trade trade) {
-            value = quote.getOpen();
+            value = quote.getValue();
             this.trade = trade;
             xAxisId = quote.getDate().toDateTimeAtStartOfDay().getMillis();
         }
@@ -295,7 +296,7 @@ public class Controller implements Initializable {
 
         @Override
         public String toString(Number object) {
-            return new LocalDate(object.longValue()).toString();
+            return new LocalDate(object.longValue()).toString("YYYY");
         }
 
         @Override

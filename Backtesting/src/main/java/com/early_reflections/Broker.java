@@ -1,7 +1,7 @@
 package com.early_reflections;
 
 
-import com.early_reflections.yahoodata.Quote;
+import com.early_reflections.data.yahoo.ExtQuote;
 
 public class Broker {
 
@@ -21,7 +21,7 @@ public class Broker {
 
     public void trade(Trade trade, Quote quote) {
 
-        double sum = quote.getOpen() * trade.getQuantity();
+        double sum = quote.getValue() * trade.getQuantity();
         if(trade.isBuy()){
             if(sum > balance){
                 // TODO
@@ -50,7 +50,7 @@ public class Broker {
      * @return The whole worth of the account (holdings + cash)
      */
     public double getAccountWorth(Quote quote){
-        return balance + holdings*quote.getOpen();
+        return balance + holdings*quote.getValue();
     }
 
     public static Broker instance(){

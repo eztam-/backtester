@@ -1,6 +1,7 @@
 package com.early_reflections.indicators;
 
-import com.early_reflections.yahoodata.Quote;
+import com.early_reflections.Quote;
+import com.early_reflections.data.yahoo.ExtQuote;
 
 
 public class MovingAverage extends Indicator {
@@ -22,7 +23,7 @@ public class MovingAverage extends Indicator {
             return null;
         double sum = 0;
         for (int i = getQuotes().size() - period; i < getQuotes().size(); i++) {
-            sum += getQuotes().get(i).getOpen();
+            sum += getQuotes().get(i).getValue();
         }
         return sum / period;
     }

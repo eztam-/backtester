@@ -1,7 +1,6 @@
 package com.early_reflections;
 
-import com.early_reflections.indicators.MovingAverage;
-import com.early_reflections.yahoodata.Quote;
+import com.early_reflections.data.yahoo.ExtQuote;
 
 /**
  * This strategy places a long order if the price moves from a lower value to
@@ -33,7 +32,7 @@ public class StrategyBuyAndHold extends Strategy {
     public int getMaxQuantity(Quote quote) {
         double cash = Broker.instance().getCash();
         
-        Double price = quote.getOpen();
+        Double price = quote.getValue();
 
         int maxQty =0;
         for(; maxQty*price<cash; maxQty++){
