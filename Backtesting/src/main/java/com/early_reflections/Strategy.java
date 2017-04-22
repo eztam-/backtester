@@ -10,7 +10,7 @@ public abstract class Strategy {
 
 	private List<Quote> quotes = new ArrayList<>();
 
-	private List<Indicator> indicators = new ArrayList();
+	private List<Indicator> indicators = new ArrayList<>();
 
 	public Trade processTick(Quote quote) {
 		this.quotes.add(quote);
@@ -45,5 +45,6 @@ public abstract class Strategy {
     public List<Indicator> getIndicators(){
 	    return indicators;
     }
+
 
 }

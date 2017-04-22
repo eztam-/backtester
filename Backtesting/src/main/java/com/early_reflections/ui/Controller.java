@@ -65,6 +65,7 @@ public class Controller implements Initializable {
 
     private int tickSleepMs = 0; // TODO volatile??
     private final static Logger LOG = LoggerFactory.getLogger(YahooDataSource.class);
+    private BacktestTask task = new BacktestTask();
 
     @Override
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
@@ -76,7 +77,7 @@ public class Controller implements Initializable {
 
         ((NumberAxis) quotesChart.getXAxis()).setForceZeroInRange(false);
         ((NumberAxis) balanceChart.getXAxis()).setForceZeroInRange(false);
-        // quotesChart.getXAxis().setAutoRanging(false);
+         // quotesChart.getXAxis().setAutoRanging(false);
 
         // TODO Disable autoranging and set upper and lower bounds manually in order to keep both charts
         // in sync and have no gaps at the beginning and end
@@ -93,6 +94,17 @@ public class Controller implements Initializable {
     }
 
     private void startBacktest(ActionEvent event) {
+        // TODO Use service instead of task. See http://stackoverflow.com/questions/16037062/javafx-use-a-thread-more-than-once
+        if(task.isRunning()){
+            return;
+        }
+        // Clear all in case of a restart
+        task = new BacktestTask();
+        quotes.clear();
+        balanceData.clear();
+        indicatorHandler.clear();
+        // strategy.reset(); TODO
+
         new Thread(task).start();
         task.setOnSucceeded(evt -> System.out.println("Task succeeded!"));
         task.setOnCancelled(evt -> System.out.println("Task cancelled!"));
@@ -106,7 +118,7 @@ public class Controller implements Initializable {
     }
 
 
-    Task<Integer> task = new Task<Integer>() {
+     class BacktestTask extends Task<Integer> {
 
         @Override
         protected Integer call() throws InterruptedException {
@@ -125,11 +137,6 @@ public class Controller implements Initializable {
 
             List<Quote> quotes = fetchData("^GDAXI");
 
-          /*  long first = quotes.get(0).getDate().toDateTimeAtStartOfDay().getMillis();
-            long last = quotes.get(quotes.size()-1).getDate().toDateTimeAtStartOfDay().getMillis();
-             ((NumberAxis) quotesChart.getXAxis()).setLowerBound(first);
-            ((NumberAxis) quotesChart.getXAxis()).setUpperBound(last);
-            */
             for (final Quote q : quotes) {
                 if (isCancelled()) {
                     break;
@@ -145,6 +152,19 @@ public class Controller implements Initializable {
 
             }
             quotesChart.stopUpdating();
+
+            // TODO This could be removed after using manual ranging globally
+            // Auto ranging is not working properly fit JavaFX charts. Therefore set the bounds finally so that the chart
+            // uses the maximum available space
+            quotesChart.getXAxis().setAutoRanging(false);
+            balanceChart.getXAxis().setAutoRanging(false);
+            long first = quotes.get(0).getDate().toDateTimeAtStartOfDay().getMillis();
+            long last = quotes.get(quotes.size()-1).getDate().toDateTimeAtStartOfDay().getMillis();
+            ((NumberAxis) quotesChart.getXAxis()).setLowerBound(first);
+            ((NumberAxis) quotesChart.getXAxis()).setUpperBound(last);
+            ((NumberAxis) balanceChart.getXAxis()).setLowerBound(first);
+            ((NumberAxis) balanceChart.getXAxis()).setUpperBound(last);
+
             return 0;
         }
     };

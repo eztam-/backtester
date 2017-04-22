@@ -58,4 +58,10 @@ public class IndicatorSeries {
 
         }
     }
+
+    public void clear() {
+        for(Entry<Indicator, XYChart.Series> i: indicatorSeries.entrySet()){
+            i.getValue().getData().clear();
+        }
+    }
 }
