@@ -6,6 +6,7 @@ import com.early_reflections.yahoodata.YahooDataSource;
 import com.google.gson.Gson;
 
 import javafx.concurrent.Task;
+import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -18,12 +19,35 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.util.StringConverter;
 import org.apache.commons.io.FileUtils;
+import org.jfree.chart.*;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.DateTickUnit;
+import org.jfree.chart.axis.DateTickUnitType;
+import org.jfree.chart.block.BlockBorder;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.title.TextTitle;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.time.Day;
+import org.jfree.data.time.Month;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.ui.RectangleInsets;
+import org.jfree.util.ShapeUtilities;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.io.*;
 import java.net.URL;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 public class Controller implements Initializable {
 
@@ -45,6 +69,10 @@ public class Controller implements Initializable {
     @FXML
     private Slider speedSlider;
 
+    @FXML
+    private SwingNode swingNode;
+
+    private TimeSeries s1 = new TimeSeries("Series 1");
     private XYChart.Series quoteSeries = new XYChart.Series();
     private XYChart.Series balanceSeries = new XYChart.Series();
 
@@ -66,6 +94,9 @@ public class Controller implements Initializable {
         balanceChart.getData().add(balanceSeries);
         indicatorHandler = new IndicatorSeries(strategy, quotesChart);
         ((NumberAxis) quotesChart.getXAxis()).setTickLabelFormatter(new XAxisLabelConverter());
+        ((NumberAxis) quotesChart.getXAxis()).setForceZeroInRange(false);
+        quotesChart.getXAxis().setAutoRanging(false);
+
 
         playButton.setOnAction(event -> startBacktest(event));
         stopButton.setOnAction(event -> task.cancel());
@@ -74,6 +105,7 @@ public class Controller implements Initializable {
         speedSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
             tickSleepMs = newValue.intValue();
         });
+
     }
 
     private void startBacktest(ActionEvent event) {
@@ -103,10 +135,16 @@ public class Controller implements Initializable {
                 quoteSeries.getData().setAll(getQuoteChartData());
                 balanceSeries.getData().setAll(getBalanceChartData());
                 indicatorHandler.updateChart();
+           // quotesChart.getXAxis().setAutoRanging(true);
                 return true;
             });
 
             List<Quote> quotes = fetchData("^GDAXI");
+
+            long first = quotes.get(0).getDate().toDateTimeAtStartOfDay().getMillis();
+            long last = quotes.get(quotes.size()-1).getDate().toDateTimeAtStartOfDay().getMillis();
+             ((NumberAxis) quotesChart.getXAxis()).setLowerBound(first);
+            ((NumberAxis) quotesChart.getXAxis()).setUpperBound(last);
             for (final Quote q : quotes) {
                 if (isCancelled()) {
                     break;
@@ -115,6 +153,8 @@ public class Controller implements Initializable {
                 final Trade trade = strategy.processTick(q);
                 broker.trade(trade, q);
                 final double accountWorth = broker.getAccountWorth(q);
+
+               // s1.add( new Day(q.getDate().toDate()), q.getOpen()); // TODO Amend performance by adding the values blockwise
 
                 updateChartData(accountWorth, q, trade);
 
@@ -135,7 +175,8 @@ public class Controller implements Initializable {
         int xAxisId = 0;
         for (int i = 0; i < quotes.size(); i++) {
             ChartQuote chartQuote = quotes.get(i);
-            chartQuote.xAxisId = xAxisId++;
+
+            //chartQuote.xAxisId = xAxisId++;
             XYChart.Data data = new XYChart.Data(chartQuote.xAxisId, chartQuote.value);
             addTradeNode(data, chartQuote.trade);
             chartData.add(data);
@@ -221,16 +262,21 @@ public class Controller implements Initializable {
         }
     }
 
-
+long base = 0;
     public class ChartQuote {
         double value;
         String label;
-        int xAxisId;
+        long xAxisId;
         Trade trade;
 
         ChartQuote(Quote quote, Trade trade) {
             value = quote.getOpen();
             this.trade = trade;
+            if(base ==0){
+                base = quote.getDate().toDateTimeAtStartOfDay().getMillis();
+            }
+          //  xAxisId = quote.getDate().toDateTimeAtStartOfDay().getMillis() - base; // TODO this is not nice ;-(
+            xAxisId = quote.getDate().toDateTimeAtStartOfDay().getMillis() ; // TODO this is not nice ;-(
             label = quote.getDate().toString();
         }
     }
@@ -239,10 +285,7 @@ public class Controller implements Initializable {
 
         @Override
         public String toString(Number object) {
-            if (object.intValue() < quotes.size()) {
-                return quotes.get(object.intValue()).label;
-            }
-            return "";
+            return new LocalDate(object.longValue()).toString();
         }
 
         @Override

@@ -4,6 +4,7 @@ import com.early_reflections.Strategy;
 import com.early_reflections.indicators.Indicator;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.XYChart;
+import org.joda.time.LocalDate;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -34,14 +35,27 @@ public class IndicatorSeries {
             List<XYChart.Data> chartData = new ArrayList<>();
             Indicator indicator = i.getKey();
 
-            for(int index=0; index<indicator.getValues().size(); index++){
-                Double value = indicator.getValues().get(index);
-                if(value!=null) {
-                    XYChart.Data data = new XYChart.Data(index++, value);
-                    chartData.add(data);
+            long start =0;
+
+
+            Iterator<Entry<LocalDate, Double>> it = indicator.getValues().entrySet().iterator();
+            while (it.hasNext()) {
+                //Double value = indicator.getValues().get(index);
+                Entry<LocalDate, Double> entry = it.next();
+                Double value = entry.getValue();
+                long ts = entry.getKey().toDateTimeAtStartOfDay().getMillis();
+                // if(value!=null) {
+                if (start == 0) {
+                    start = ts;
                 }
+
+                // XYChart.Data data = new XYChart.Data(ts-start, entry.getValue());
+                XYChart.Data data = new XYChart.Data(ts, value);
+                chartData.add(data);
+                // }
             }
             i.getValue().getData().setAll(chartData);
+
         }
     }
 }

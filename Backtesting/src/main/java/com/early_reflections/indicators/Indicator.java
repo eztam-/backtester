@@ -2,37 +2,54 @@ package com.early_reflections.indicators;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.SortedMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import com.early_reflections.yahoodata.Quote;
+import org.joda.time.LocalDate;
 
 public abstract class Indicator {
 
-	private List<Quote> quotes = new ArrayList<>();
+    private List<Quote> quotes = new ArrayList<>();
 
-	public abstract String getId();
+    private SortedMap<LocalDate, Double> values = new ConcurrentSkipListMap();
 
-	public abstract List<Double> getValues();
+    /**
+     * @return A unique identifier for the indicator.
+     */
+    public abstract String getId();
 
-	public void performTradingDay(Quote quote) {
-		this.quotes.add(quote);
-		tradingDayTick(quote);
-	}
+    /**
+     * Gets called on each tick e.g. daily.
+     *
+     * @param quote The current quote
+     * @return The calculated indicator value for the current tick or null if the indicator has no value for the current tick.
+     */
+    protected abstract Double tradingDayTick(Quote quote);
 
-	public List<Quote> getQuotes() {
-		return quotes;
-	}
+    public SortedMap<LocalDate, Double> getValues() {
+        return values;
+    }
 
-	/**
-	 * Gets called on each tick (daily).
-	 * 
-	 * @param quote
-	 *            The quote of the current tick
-	 */
-	protected abstract void tradingDayTick(Quote quote);
+    /**
+     * For internal usage only.
+     *
+     * @param quote
+     */
+    public void performTradingDay(Quote quote) {
+        this.quotes.add(quote);
+        Double value = tradingDayTick(quote);
+        if (value != null) {
+            values.put(quote.getDate(), value);
+        }
+    }
 
-	@Override
-	public int hashCode() {
-		return getId().hashCode();
-	}
+    public List<Quote> getQuotes() {
+        return quotes;
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
 }

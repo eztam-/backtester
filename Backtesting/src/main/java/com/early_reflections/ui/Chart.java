@@ -19,10 +19,9 @@ public class Chart extends AreaChart<Number, Number> {
     private UpdateHandler updateHandler;
     private Timeline periodicChartUpdater;
 
-    public Chart(@NamedArg("xAxis") Axis<Number> numberAxis, @NamedArg("yAxis") Axis<Number> numberAxis2) {
-        super(numberAxis, numberAxis2);
+    public Chart(@NamedArg("xAxis") Axis<Number> xAxis, @NamedArg("yAxis") Axis<Number> yAxis) {
+        super(xAxis, yAxis);
     }
-
 
     void startPeriodicUpdate(UpdateHandler updateHandler){
         this.updateHandler = updateHandler;

@@ -2,6 +2,7 @@
 
 <?import com.early_reflections.ui.AwesomeIcons?>
 <?import com.early_reflections.ui.Chart?>
+<?import javafx.embed.swing.SwingNode?>
 <?import javafx.scene.chart.AreaChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
@@ -15,13 +16,17 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
-
 <BorderPane xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.early_reflections.ui.Controller">
    <center>
       <SplitPane dividerPositions="0.9412698412698413">
          <items>
-            <SplitPane dividerPositions="0.7219730941704036" orientation="VERTICAL" prefHeight="446.0" prefWidth="502.0">
+            <SplitPane dividerPositions="0.722, 0.5" orientation="VERTICAL" prefHeight="446.0" prefWidth="502.0">
                <items>
+
+                   <SwingNode fx:id="swingNode">
+
+
+                   </SwingNode>
                   <!-- Quotes chart -->
                   <Chart fx:id="quotesChart" animated="false" createSymbols="false" legendVisible="false" styleClass="quotes-chart">
                     <xAxis>
@@ -46,7 +51,7 @@
             </SplitPane>
             <TabPane prefWidth="120.0" side="RIGHT" tabClosingPolicy="UNAVAILABLE">
               <tabs>
-                <Tab text="Untitled Tab 1">
+                <Tab text="Settings">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                   </content>

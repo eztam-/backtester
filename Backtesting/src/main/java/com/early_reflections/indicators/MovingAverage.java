@@ -1,42 +1,29 @@
 package com.early_reflections.indicators;
 
-import java.util.*;
-
-import org.joda.time.LocalDate;
-
 import com.early_reflections.yahoodata.Quote;
+
 
 public class MovingAverage extends Indicator {
 
-	private List<Double> values;
-	private int period;
+    private int period;
 
-	public MovingAverage(int period) {
-		values = new ArrayList();
-		this.period = period;
-	}
+    public MovingAverage(int period) {
+        this.period = period;
+    }
 
-	@Override
-	public String getId() {
-		return "Moving Average " + period;
-	}
+    @Override
+    public String getId() {
+        return "Moving average" + period;
+    }
 
-	@Override
-	public List<Double> getValues() {
-		return values;
-	}
-
-	@Override
-	protected void tradingDayTick(Quote quote) {
-		if (getQuotes().size() < period) {
-			values.add( null);
-			return;
-		}
-		double sum = 0;
-		for (int i = getQuotes().size() - period; i < getQuotes().size(); i++) {
-			sum += getQuotes().get(i).getOpen();
-		}
-
-		values.add( sum / period);
-	}
+    @Override
+    protected Double tradingDayTick(Quote quote) {
+        if (getQuotes().size() < period)
+            return null;
+        double sum = 0;
+        for (int i = getQuotes().size() - period; i < getQuotes().size(); i++) {
+            sum += getQuotes().get(i).getOpen();
+        }
+        return sum / period;
+    }
 }

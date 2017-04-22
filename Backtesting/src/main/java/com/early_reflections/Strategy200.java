@@ -2,6 +2,7 @@ package com.early_reflections;
 
 import com.early_reflections.indicators.MovingAverage;
 import com.early_reflections.yahoodata.Quote;
+import org.joda.time.LocalDate;
 
 /**
  * This strategy places a long order if the price moves from a lower value to
@@ -31,10 +32,14 @@ public class Strategy200 extends Strategy {
         if(lastIndex<3){
             return  null;
         }
-        Double last60 = ma60.getValues().get(lastIndex);
-        Double last200 = ma200.getValues().get(lastIndex);
-        Double seconLast60 = ma60.getValues().get(lastIndex-1);
-        Double seconLast200 = ma200.getValues().get(lastIndex-1);
+
+        LocalDate lastDate = getQuotes().get(lastIndex).getDate();
+        LocalDate secondLastDate = getQuotes().get(lastIndex-1).getDate();
+
+        Double last60 = ma60.getValues().get(lastDate);
+        Double last200 = ma200.getValues().get(lastDate);
+        Double seconLast60 = ma60.getValues().get(secondLastDate);
+        Double seconLast200 = ma200.getValues().get(secondLastDate);
 
         if(last60== null || last200 == null || seconLast60 == null || seconLast200==null){
             return null;
