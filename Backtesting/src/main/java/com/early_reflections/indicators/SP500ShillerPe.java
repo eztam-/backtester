@@ -3,25 +3,29 @@ package com.early_reflections.indicators;
 import com.early_reflections.Quote;
 import com.early_reflections.data.local.LocalDataSource;
 import com.early_reflections.data.yahoo.ExtQuote;
+import org.joda.time.LocalDate;
 
-import java.util.List;
+import java.util.*;
 
-/**
- * Created by x on 22/04/2017.
- */
+// TODO is painted suboptimal on the chart sice it has a completely different y axis scale
 public class SP500ShillerPe extends Indicator{
 
+    private SortedMap<LocalDate, Double> shillerPeValues = new TreeMap();
+
     public SP500ShillerPe(){
-        List<com.early_reflections.Quote> data = new LocalDataSource().getFromFile("indicators/S&P500-Shiller-PE.json");
+        List<Quote> data = new LocalDataSource().getFromFile("indicators/S&P500-Shiller-PE.json");
+        for(Quote q: data){
+            shillerPeValues.put(q.getDate(),q.getValue());
+        }
     }
 
     @Override
     public String getId() {
-        return null;
+        return "SP500 Shiller PE";
     }
 
     @Override
     protected Double tradingDayTick(Quote quote) {
-        return null;
+        return shillerPeValues.get(quote.getDate());
     }
 }

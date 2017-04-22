@@ -18,6 +18,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
 import javafx.util.StringConverter;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.LocalDate;
@@ -25,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
@@ -62,6 +65,8 @@ public class Controller implements Initializable {
 
     private Strategy strategy = new Strategy200();
     // private Strategy strategy = new StrategyBuyAndHold();
+   // private Strategy strategy = new StrategyValue();
+
     private IndicatorSeries indicatorHandler;
 
     private int tickSleepMs = 0; // TODO volatile??
@@ -200,19 +205,30 @@ public class Controller implements Initializable {
     }
 
     private List<Quote> fetchData(String symbol) {
-
-        File file = new File("^GDAXI.json");
+        // Read from yahoo or cached file
+        //File file = new File("^GDAXI.json");
+        File file = new File("^GSPC.json");
         if (!file.exists()) {
             LOG.debug("No data file for symbol " + symbol + " found. Downloading it from internet.");
             // TODO show ui progress bar
             YahooDataSource t = new YahooDataSource();
             List<Quote> quotes = t.fetchHistoricQuotes("^GDAXI"); // TODO move this old stuff to separate class
             new LocalDataSource().writeToFile(quotes,file);
-
         }
-      //  FileReader reader = new FileReader(file);
-      //  Quote[] q = new Gson().fromJson(reader, Quote[].class);
-      //  reader.close();
+
+
+        // Read local file
+        /*
+        URI uri = null;
+        try {
+            uri = getClass().getClassLoader().getResource("S&P500-Index.json").toURI();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        File file = new File(uri);
+        */
+
+
         List<Quote> q = new LocalDataSource().getFromFile(file);
         return q;
     }

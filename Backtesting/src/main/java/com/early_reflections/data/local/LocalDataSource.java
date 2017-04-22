@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class LocalDataSource {
@@ -23,7 +24,7 @@ public class LocalDataSource {
         List<Quote> quotes = new ArrayList<>();
         try {
             ExtQuote[] data = new Gson().fromJson(new FileReader(file), ExtQuote[].class);
-            for(int i=0; i<data.length; i++){
+            for (int i = 0; i < data.length; i++) {
                 ExtQuote extQuote = data[i];
                 quotes.add(new Quote(new LocalDate(extQuote.date), extQuote.value));
             }
@@ -31,12 +32,14 @@ public class LocalDataSource {
             // TODO
             e.printStackTrace();
         }
+        quotes.sort(Comparator.comparing(Quote::getDate));
         return quotes;
 
     }
+
     public List<Quote> getFromFile(String filename) {
         try {
-        URL url = Test.class.getClassLoader().getResource(filename);
+            URL url = Test.class.getClassLoader().getResource(filename);
             return getFromFile(new File(url.toURI()));
         } catch (URISyntaxException e) {
             // TODO
@@ -47,12 +50,10 @@ public class LocalDataSource {
 
     public void writeToFile(List<Quote> quotes, File file) {
         try {
-        ArrayList<ExtQuote> extQuotes = new ArrayList<ExtQuote>();
-        for(Quote q: quotes){
-            extQuotes.add(new ExtQuote(q));
-        }
-
-
+            ArrayList<ExtQuote> extQuotes = new ArrayList();
+            for (Quote q : quotes) {
+                extQuotes.add(new ExtQuote(q));
+            }
             FileUtils.writeStringToFile(file, new Gson().toJson(extQuotes));
         } catch (IOException e) {
             // TODO
@@ -64,10 +65,13 @@ public class LocalDataSource {
     public class ExtQuote {
         private Double value;
         private String date;
-        public ExtQuote() {}
+
+        public ExtQuote() {
+        }
+
         public ExtQuote(Quote q) {
-           this.date = q.getDate().toString();
-           this.value = q.getValue();
+            this.date = q.getDate().toString();
+            this.value = q.getValue();
         }
     }
 
