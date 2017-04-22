@@ -19,33 +19,12 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.util.StringConverter;
 import org.apache.commons.io.FileUtils;
-import org.jfree.chart.*;
-import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.axis.DateTickUnit;
-import org.jfree.chart.axis.DateTickUnitType;
-import org.jfree.chart.block.BlockBorder;
-import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.category.BarRenderer;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.chart.title.TextTitle;
-import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.time.Day;
-import org.jfree.data.time.Month;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.RectangleInsets;
-import org.jfree.util.ShapeUtilities;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.io.*;
 import java.net.URL;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
@@ -72,7 +51,6 @@ public class Controller implements Initializable {
     @FXML
     private SwingNode swingNode;
 
-    private TimeSeries s1 = new TimeSeries("Series 1");
     private XYChart.Series quoteSeries = new XYChart.Series();
     private XYChart.Series balanceSeries = new XYChart.Series();
 
