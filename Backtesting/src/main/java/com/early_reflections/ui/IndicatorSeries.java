@@ -24,6 +24,7 @@ public class IndicatorSeries {
         this.chart = quotesChart;
         for(Indicator i: strategy.getIndicators()){
             XYChart.Series series = new XYChart.Series();
+            series.setName(i.getId());
             chart.getData().add(series);
             indicatorSeries.put(i,series);
         }

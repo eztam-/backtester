@@ -15,33 +15,30 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.early_reflections.ui.Controller">
+<BorderPane xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.early_reflections.ui.Controller">
     <center>
         <SplitPane dividerPositions="0.9412698412698413">
             <items>
-                <SplitPane dividerPositions="0.722, 0.5" orientation="VERTICAL" prefHeight="446.0" prefWidth="502.0">
+                <SplitPane dividerPositions="0.722" orientation="VERTICAL" prefHeight="446.0" prefWidth="502.0">
                     <items>
 
                         <!-- Quotes chart -->
-                        <Chart fx:id="quotesChart" animated="false" createSymbols="false" legendVisible="false"
-                               styleClass="quotes-chart">
+                        <Chart fx:id="quotesChart" animated="false" createSymbols="false" legendSide="TOP" styleClass="quotes-chart">
                             <xAxis>
-                                <NumberAxis side="BOTTOM"/>
+                                <NumberAxis side="BOTTOM" />
                             </xAxis>
                             <yAxis>
-                                <NumberAxis side="LEFT"/>
+                                <NumberAxis side="LEFT" />
                             </yAxis>
                         </Chart>
 
                         <!-- Balance chart-->
-                        <AreaChart fx:id="balanceChart" animated="false" createSymbols="false" legendVisible="false"
-                                   minHeight="120.0" prefHeight="160.0" styleClass="balance-chart">
+                        <AreaChart fx:id="balanceChart" animated="false" createSymbols="false" legendVisible="false" minHeight="120.0" prefHeight="160.0" styleClass="balance-chart">
                             <xAxis>
-                                <NumberAxis side="BOTTOM"/>
+                                <NumberAxis side="BOTTOM" />
                             </xAxis>
                             <yAxis>
-                                <NumberAxis side="LEFT"/>
+                                <NumberAxis side="LEFT" />
                             </yAxis>
                         </AreaChart>
 
@@ -51,12 +48,12 @@
                     <tabs>
                         <Tab text="Settings">
                             <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                             </content>
                         </Tab>
                         <Tab text="Untitled Tab 2">
                             <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                             </content>
                         </Tab>
                     </tabs>
@@ -69,30 +66,30 @@
             <items>
                 <Button fx:id="playButton" mnemonicParsing="false">
                     <text>
-                        <AwesomeIcons fx:constant="ICON_PLAY"/>
+                        <AwesomeIcons fx:constant="ICON_PLAY" />
                     </text>
                     <font>
-                        <Font name="FontAwesome" size="14.0"/>
+                        <Font name="FontAwesome" size="14.0" />
                     </font>
                 </Button>
                 <Button fx:id="pauseButton" mnemonicParsing="false">
                     <text>
-                        <AwesomeIcons fx:constant="ICON_PAUSE"/>
+                        <AwesomeIcons fx:constant="ICON_PAUSE" />
                     </text>
                     <font>
-                        <Font name="FontAwesome" size="14.0"/>
+                        <Font name="FontAwesome" size="14.0" />
                     </font>
                 </Button>
                 <Button fx:id="stopButton" mnemonicParsing="false">
                     <text>
-                        <AwesomeIcons fx:constant="ICON_STOP"/>
+                        <AwesomeIcons fx:constant="ICON_STOP" />
                     </text>
                     <font>
-                        <Font name="FontAwesome" size="14.0"/>
+                        <Font name="FontAwesome" size="14.0" />
                     </font>
                 </Button>
-                <Label text="Speed"/>
-                <Slider fx:id="speedSlider"/>
+                <Label text="Speed" />
+                <Slider fx:id="speedSlider" />
             </items>
         </ToolBar>
     </top>

@@ -5,19 +5,26 @@ import com.early_reflections.data.yahoo.ExtQuote;
 import org.joda.time.LocalDate;
 
 /**
- * This strategy places a long order if the price moves from a lower value to
- * above the moving average of the last 200 days. If the price falls down to a
- * value lower than the moving average then all open positions will be closed.
- * 
+ * This strategy places a long order if the 60 days moving average goes
+ * above the moving average of the last 200 days. If the price falls down ans the opposite happens,
+ * all open positions will be closed.
+ *
  * @author Matthias Birschl
  *
  */
 public class Strategy200 extends Strategy {
 
-	private MovingAverage ma200 = new MovingAverage(200);
+    private final boolean isCostAveraging;
+    private MovingAverage ma200 = new MovingAverage(200);
     private MovingAverage ma60 = new MovingAverage(60);
+    private int month = 0;
 
-	public Strategy200() {
+    /**
+     *
+     * @param isCostAveraging If false, a fixed account balance is used. If true the account increases by a monthly deposit
+     */
+	public Strategy200(boolean isCostAveraging) {
+	    this.isCostAveraging = isCostAveraging;
 		registerIndicator(ma200);
         registerIndicator(ma60);
 	}
@@ -25,7 +32,12 @@ public class Strategy200 extends Strategy {
 	@Override
 	protected Trade tick(Quote quote) {
 
-
+        int m = quote.getDate().getMonthOfYear();
+        if(isCostAveraging && m!=month){
+            month = m;
+            // Monthly savings
+            Broker.instance().deposit(1600);
+        }
 
 
         int lastIndex = getQuotes().size() - 1;

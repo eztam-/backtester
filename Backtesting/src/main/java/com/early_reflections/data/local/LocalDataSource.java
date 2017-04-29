@@ -2,7 +2,7 @@ package com.early_reflections.data.local;
 
 
 import com.early_reflections.Quote;
-import com.early_reflections.tools.Test;
+import com.early_reflections.tools.JsonConverter;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.LocalDate;
@@ -39,7 +39,7 @@ public class LocalDataSource {
 
     public List<Quote> getFromFile(String filename) {
         try {
-            URL url = Test.class.getClassLoader().getResource(filename);
+            URL url = JsonConverter.class.getClassLoader().getResource(filename);
             return getFromFile(new File(url.toURI()));
         } catch (URISyntaxException e) {
             // TODO

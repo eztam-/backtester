@@ -1,13 +1,9 @@
 package com.early_reflections.ui;
 
 import com.early_reflections.*;
-import com.early_reflections.data.local.LocalDataSource;
-import com.early_reflections.data.yahoo.ExtQuote;
-import com.early_reflections.data.yahoo.YahooDataSource;
-import com.google.gson.Gson;
+import com.early_reflections.data.DataSource;
 
 import javafx.concurrent.Task;
-import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -18,16 +14,11 @@ import javafx.scene.control.Slider;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.text.Font;
 import javafx.util.StringConverter;
-import org.apache.commons.io.FileUtils;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
@@ -52,9 +43,6 @@ public class Controller implements Initializable {
     @FXML
     private Slider speedSlider;
 
-    @FXML
-    private SwingNode swingNode;
-
     private XYChart.Series quoteSeries = new XYChart.Series();
     private XYChart.Series balanceSeries = new XYChart.Series();
 
@@ -63,14 +51,15 @@ public class Controller implements Initializable {
 
     private Broker broker = Broker.instance();
 
-    private Strategy strategy = new Strategy200();
-    // private Strategy strategy = new StrategyBuyAndHold();
-   // private Strategy strategy = new StrategyValue();
+    private Strategy strategy = new Strategy200(true);
+    //private Strategy strategy = new DollarCostAveraging(true);
+    //private Strategy strategy = new DollarCostAveragingMa200(true);
+    // private Strategy strategy = new StrategyValue();
 
     private IndicatorSeries indicatorHandler;
 
     private int tickSleepMs = 0; // TODO volatile??
-    private final static Logger LOG = LoggerFactory.getLogger(YahooDataSource.class);
+    private final static Logger LOG = LoggerFactory.getLogger(Controller.class);
     private BacktestTask task = new BacktestTask();
 
     @Override
@@ -141,7 +130,7 @@ public class Controller implements Initializable {
                 return true;
             });
 
-            List<Quote> quotes = fetchData("^GDAXI");
+            List<Quote> quotes = fetchData();
 
             for (final Quote q : quotes) {
                 if (isCancelled()) {
@@ -184,7 +173,6 @@ public class Controller implements Initializable {
 
     private List<XYChart.Data> getQuoteChartData() {
         List<XYChart.Data> chartData = new ArrayList<>();
-        int xAxisId = 0;
         for (int i = 0; i < quotes.size(); i++) {
             ChartQuote chartQuote = quotes.get(i);
             XYChart.Data data = new XYChart.Data(chartQuote.xAxisId, chartQuote.value);
@@ -204,33 +192,16 @@ public class Controller implements Initializable {
         return balance;
     }
 
-    private List<Quote> fetchData(String symbol) {
-        // Read from yahoo or cached file
-        //File file = new File("^GDAXI.json");
-        File file = new File("^GSPC.json");
-        if (!file.exists()) {
-            LOG.debug("No data file for symbol " + symbol + " found. Downloading it from internet.");
-            // TODO show ui progress bar
-            YahooDataSource t = new YahooDataSource();
-            List<Quote> quotes = t.fetchHistoricQuotes("^GDAXI"); // TODO move this old stuff to separate class
-            new LocalDataSource().writeToFile(quotes,file);
+    // TODO Extract the two types of data sources maybe by ui config
+    private List<Quote> fetchData() {
+        List<Quote> data = new DataSource().fromYahoo("^GDAXI"); // "^GSPC.json"
+        //  List<Quote> data = DataSource().fromFile("S&P500-Index.json");
+
+        // The Dax or SP500 are usually not directly tradable and have relatively high index numbers. Therefore simply divide all index points by 100
+        for(Quote q: data){
+            q.setValue(q.getValue()/100.0);
         }
-
-
-        // Read local file
-        /*
-        URI uri = null;
-        try {
-            uri = getClass().getClassLoader().getResource("S&P500-Index.json").toURI();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        File file = new File(uri);
-        */
-
-
-        List<Quote> q = new LocalDataSource().getFromFile(file);
-        return q;
+        return data;
     }
 
 

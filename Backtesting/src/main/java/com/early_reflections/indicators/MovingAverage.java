@@ -14,7 +14,7 @@ public class MovingAverage extends Indicator {
 
     @Override
     public String getId() {
-        return "Moving average" + period;
+        return  period + " days moving average";
     }
 
     @Override

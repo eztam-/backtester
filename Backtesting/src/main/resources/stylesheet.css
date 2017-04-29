@@ -3,7 +3,7 @@
     -fx-stroke-width: 1px;
 }
 
-.default-color0.chart-area-symbol { -fx-background-color: #e9967a, #ffa07a; }
+.default-color0.chart-area-symbol { -fx-background-color: #3FFA32, #9cfa8f; }
 .default-color1.chart-area-symbol { -fx-background-color: #f0e68c, #fffacd; }
 .default-color2.chart-area-symbol { -fx-background-color: #dda0dd, #d8bfd855; }
 
@@ -41,3 +41,16 @@
 .balance-chart .default-color0.chart-series-area-fill { -fx-fill: rgba(91, 194, 250, 0.4); }
 
 
+/* Chart legend */
+.chart-legend {
+    -fx-background-color:  transparent;
+   /* -fx-padding: 0px;*/
+}
+
+.chart-legend-item-symbol{
+
+}
+
+.chart-legend-item{
+    -fx-text-fill: rgb(226, 223, 223);
+}

@@ -16,10 +16,10 @@ import java.util.List;
 /**
  * A little tool for converting json dates and values
  */
-public class Test {
+public class JsonConverter {
 
     public static void main(String argv[]) throws URISyntaxException, FileNotFoundException {
-        URL url = Test.class.getClassLoader().getResource("S&P500-Shiller-PE.json");
+        URL url = JsonConverter.class.getClassLoader().getResource("S&P500-Index.json");
         Quote1[] data = new Gson().fromJson(new FileReader(new File(url.toURI())), Quote1[].class);
 
         List<Quote2>  q2 = new ArrayList<>();

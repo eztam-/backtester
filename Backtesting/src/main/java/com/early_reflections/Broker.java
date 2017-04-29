@@ -5,7 +5,7 @@ import com.early_reflections.data.yahoo.ExtQuote;
 
 public class Broker {
 
-    private double balance = 10000;
+    private double balance = 50000;
 
     // Number of shares
     private int holdings = 0;
@@ -65,5 +65,8 @@ public class Broker {
     }
     public double getCash() {
         return balance;
+    }
+    public void deposit(double amount){
+        balance+=amount;
     }
 }
