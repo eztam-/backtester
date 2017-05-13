@@ -1,7 +1,6 @@
 package com.early_reflections.indicators;
 
 import com.early_reflections.Quote;
-import com.early_reflections.data.yahoo.ExtQuote;
 
 
 public class MovingAverage extends Indicator {

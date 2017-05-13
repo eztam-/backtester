@@ -50,7 +50,7 @@ public class LocalDataSource {
 
     public void writeToFile(List<Quote> quotes, File file) {
         try {
-            ArrayList<ExtQuote> extQuotes = new ArrayList();
+            ArrayList<ExtQuote> extQuotes = new ArrayList<>();
             for (Quote q : quotes) {
                 extQuotes.add(new ExtQuote(q));
             }

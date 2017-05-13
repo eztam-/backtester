@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.util.*;
-import java.util.List;
 
 public class Controller implements Initializable {
 
@@ -46,19 +45,19 @@ public class Controller implements Initializable {
     private XYChart.Series quoteSeries = new XYChart.Series();
     private XYChart.Series balanceSeries = new XYChart.Series();
 
-    private List<ChartQuote> quotes = new ArrayList<>();
-    private List<ChartBalance> balanceData = new ArrayList<>();
+    private List<ChartQuote> quotes = Collections.synchronizedList(new ArrayList<>());
+    private List<ChartBalance> balanceData = Collections.synchronizedList(new ArrayList<>());
 
     private Broker broker = Broker.instance();
 
     private Strategy strategy = new Strategy200(true);
-    //private Strategy strategy = new DollarCostAveraging(true);
-    //private Strategy strategy = new DollarCostAveragingMa200(true);
+    // private Strategy strategy = new DollarCostAveraging(true);
+    // private Strategy strategy = new DollarCostAveragingMa200(true);
     // private Strategy strategy = new StrategyValue();
 
     private IndicatorSeries indicatorHandler;
 
-    private int tickSleepMs = 0; // TODO volatile??
+    private volatile int tickSleepMs = 0;
     private final static Logger LOG = LoggerFactory.getLogger(Controller.class);
     private BacktestTask task = new BacktestTask();
 
@@ -78,13 +77,11 @@ public class Controller implements Initializable {
         // in sync and have no gaps at the beginning and end
 
 
-        playButton.setOnAction(event -> startBacktest(event));
+        playButton.setOnAction(this::startBacktest);
         stopButton.setOnAction(event -> task.cancel());
         // TODO pauseButton
 
-        speedSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-            tickSleepMs = newValue.intValue();
-        });
+        speedSlider.valueProperty().addListener((observable, oldValue, newValue) -> tickSleepMs = newValue.intValue());
 
     }
 
@@ -163,7 +160,7 @@ public class Controller implements Initializable {
 */
             return 0;
         }
-    };
+    }
 
 
     private void updateChartData(double accountWorth, Quote q, Trade trade) {

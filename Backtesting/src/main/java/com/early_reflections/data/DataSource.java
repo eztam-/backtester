@@ -24,8 +24,7 @@ public class DataSource {
             e.printStackTrace(); // TODO
         }
         File file = new File(uri);
-        List<Quote> quotes = new LocalDataSource().getFromFile(file);
-        return quotes;
+        return new LocalDataSource().getFromFile(file);
     }
 
     public List<Quote> fromYahoo(String symbol){
@@ -37,8 +36,7 @@ public class DataSource {
             List<Quote> quotes = t.fetchHistoricQuotes(symbol); // TODO move this old stuff to separate class
             new LocalDataSource().writeToFile(quotes,file);
         }
-        List<Quote> quotes = new LocalDataSource().getFromFile(file);
-        return quotes;
+        return new LocalDataSource().getFromFile(file);
     }
 
 

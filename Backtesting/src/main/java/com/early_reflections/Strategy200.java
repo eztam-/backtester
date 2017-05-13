@@ -1,7 +1,6 @@
 package com.early_reflections;
 
 import com.early_reflections.indicators.MovingAverage;
-import com.early_reflections.data.yahoo.ExtQuote;
 import org.joda.time.LocalDate;
 
 /**

@@ -6,26 +6,19 @@ import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.XYChart;
 import org.joda.time.LocalDate;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.Map.Entry;
 
-/**
- * Created by x on 16/04/2017.
- */
 public class IndicatorSeries {
 
-
-    private final AreaChart<Number, Number> chart;
-    private Map<Indicator, XYChart.Series> indicatorSeries = new HashMap<>();
+    private final Map<Indicator, XYChart.Series> indicatorSeries = new HashMap<>();
 
 
     public IndicatorSeries(Strategy strategy, AreaChart<Number, Number> quotesChart) {
-        this.chart = quotesChart;
         for(Indicator i: strategy.getIndicators()){
             XYChart.Series series = new XYChart.Series();
             series.setName(i.getId());
-            chart.getData().add(series);
+            quotesChart.getData().add(series);
             indicatorSeries.put(i,series);
         }
     }

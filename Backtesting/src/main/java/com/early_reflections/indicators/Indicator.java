@@ -6,14 +6,13 @@ import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import com.early_reflections.Quote;
-import com.early_reflections.data.yahoo.ExtQuote;
 import org.joda.time.LocalDate;
 
 public abstract class Indicator {
 
     private List<Quote> quotes = new ArrayList<>();
 
-    private SortedMap<LocalDate, Double> values = new ConcurrentSkipListMap();
+    private SortedMap<LocalDate, Double> values = new ConcurrentSkipListMap<>();
 
     /**
      * @return A unique identifier for the indicator.
@@ -37,7 +36,7 @@ public abstract class Indicator {
      *
      * @param quote
      */
-    public void performTradingDay(Quote quote) {
+    public final void performTradingDay(Quote quote) {
         this.quotes.add(quote);
         Double value = tradingDayTick(quote);
         if (value != null) {
@@ -45,7 +44,7 @@ public abstract class Indicator {
         }
     }
 
-    public List<Quote> getQuotes() {
+    public final List<Quote> getQuotes() {
         return quotes;
     }
 

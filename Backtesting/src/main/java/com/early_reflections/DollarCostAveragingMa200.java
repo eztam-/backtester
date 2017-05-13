@@ -60,7 +60,7 @@ public class DollarCostAveragingMa200 extends Strategy {
             }
 
         }
-        
+
         return null;
 	}
 

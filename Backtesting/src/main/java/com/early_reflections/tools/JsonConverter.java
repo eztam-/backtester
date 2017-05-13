@@ -28,7 +28,7 @@ public class JsonConverter {
         }
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String str = gson.toJson(q2).toString();
+        String str = gson.toJson(q2);
         System.out.println(str);
     }
 

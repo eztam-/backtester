@@ -1,8 +1,6 @@
 package com.early_reflections;
 
 
-import com.early_reflections.data.yahoo.ExtQuote;
-
 public class Broker {
 
     private double balance = 50000;

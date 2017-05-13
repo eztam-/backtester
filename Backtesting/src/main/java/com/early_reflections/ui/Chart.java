@@ -4,10 +4,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.NamedArg;
-import javafx.collections.ListChangeListener;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.Axis;
-import javafx.scene.chart.XYChart;
 import javafx.util.Duration;
 
 /**
@@ -15,7 +13,7 @@ import javafx.util.Duration;
  */
 public class Chart extends AreaChart<Number, Number> {
 
-    private boolean isRendering=false;
+    private boolean isRendering = false;
     private UpdateHandler updateHandler;
     private Timeline periodicChartUpdater;
 
@@ -23,18 +21,22 @@ public class Chart extends AreaChart<Number, Number> {
         super(xAxis, yAxis);
     }
 
-    void startPeriodicUpdate(UpdateHandler updateHandler){
+    /**
+     * @param updateHandler A functional interface which method will be executed periodically in order to update the chart.
+     *                      The update method is called from UI thread.
+     */
+    void startPeriodicUpdate(UpdateHandler updateHandler) {
         this.updateHandler = updateHandler;
         // Updating the chart periodically after some time is much more performant than updating on each new data
-         periodicChartUpdater = new Timeline(new KeyFrame(Duration.millis(100), event -> {
+        periodicChartUpdater = new Timeline(new KeyFrame(Duration.millis(100), event -> {
 
-            if(isRendering){
+            if (isRendering) {
                 System.out.println("is rendering");
                 return;
             }
             isRendering = true;
             boolean hasChanged = updateHandler.update();
-            if(!hasChanged){
+            if (!hasChanged) {
                 isRendering = false;
             }
         }));
@@ -42,25 +44,23 @@ public class Chart extends AreaChart<Number, Number> {
         periodicChartUpdater.play();
     }
 
-    public void stopUpdating(){
+    public void stopUpdating() {
         periodicChartUpdater.stop();
-        Platform.runLater(() -> {
-            updateHandler.update();
-        });
+        Platform.runLater(() -> updateHandler.update());
     }
 
 
     @Override
     protected void layoutPlotChildren() {
         super.layoutPlotChildren();
-        isRendering=false;
-        System.out.println("layoutPlotChildren");
+        isRendering = false;
     }
 
-    public interface UpdateHandler{
+    public interface UpdateHandler {
 
         /**
          * Updating the chart series should be done in this method.
+         *
          * @return True if the data has changed otherwise false
          */
         boolean update();

@@ -1,6 +1,5 @@
 package com.early_reflections;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 public class Quote {

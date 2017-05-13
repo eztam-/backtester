@@ -1,7 +1,5 @@
 package com.early_reflections;
 
-import com.early_reflections.data.yahoo.ExtQuote;
-
 /**
  * Simple dollar cost averaging strategy.
  * 

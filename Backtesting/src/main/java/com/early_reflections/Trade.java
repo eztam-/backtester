@@ -1,8 +1,5 @@
 package com.early_reflections;
 
-/**
- * Created by x on 15/04/2017.
- */
 public class Trade {
 
     private int quantity;

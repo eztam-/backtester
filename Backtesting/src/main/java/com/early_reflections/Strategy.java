@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.early_reflections.indicators.Indicator;
-import com.early_reflections.data.yahoo.ExtQuote;
 
 public abstract class Strategy {
 
@@ -12,7 +11,7 @@ public abstract class Strategy {
 
 	private List<Indicator> indicators = new ArrayList<>();
 
-	public Trade processTick(Quote quote) {
+	public final Trade processTick(Quote quote) {
 		this.quotes.add(quote);
 		for(Indicator i: indicators){
 		    i.performTradingDay(quote);
@@ -33,16 +32,16 @@ public abstract class Strategy {
      *
      * @return All historic quotes
      */
-	public List<Quote> getQuotes() {
+	public final List<Quote> getQuotes() {
 		return quotes;
 	}
 
 
-	protected void registerIndicator(Indicator indicator){
+	protected final void registerIndicator(Indicator indicator){
         indicators.add(indicator);
     }
 
-    public List<Indicator> getIndicators(){
+    public final List<Indicator> getIndicators(){
 	    return indicators;
     }
 
