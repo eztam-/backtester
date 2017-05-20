@@ -1,8 +1,12 @@
-package com.early_reflections.ui;
+package com.early_reflection.ui;
 
-import com.early_reflections.*;
-import com.early_reflections.data.DataSource;
+import com.early_reflection.api.Broker;
+import com.early_reflection.api.Quote;
+import com.early_reflection.api.Strategy;
+import com.early_reflection.api.Trade;
+import com.early_reflection.data.DataSource;
 
+import com.early_reflection.examples.strategies.Strategy200;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -135,7 +139,8 @@ public class Controller implements Initializable {
                 }
                 Thread.sleep(tickSleepMs);
                 final Trade trade = strategy.processTick(q);
-                broker.trade(trade, q);
+                if(trade!=null)
+                     broker.trade(trade, q);
                 final double accountWorth = broker.getAccountWorth(q);
 
                 // s1.add( new Day(q.getDate().toDate()), q.getOpen()); // TODO Amend performance by adding the values blockwise
@@ -207,8 +212,10 @@ public class Controller implements Initializable {
      */
     private void addTradeNode(XYChart.Data data, Trade trade) {
         // TODO add something more eye cyndy
-
-        if (trade.isBuy()) {
+        if(trade == null){
+            return;
+        }
+        else if (trade.isBuy()) {
 
 
         /*

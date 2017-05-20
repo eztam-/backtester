@@ -1,7 +1,7 @@
-package com.early_reflections.ui;
+package com.early_reflection.ui;
 
-import com.early_reflections.Strategy;
-import com.early_reflections.indicators.Indicator;
+import com.early_reflection.api.Strategy;
+import com.early_reflection.api.Indicator;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.XYChart;
 import org.joda.time.LocalDate;

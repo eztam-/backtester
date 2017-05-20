@@ -1,4 +1,9 @@
-package com.early_reflections;
+package com.early_reflection.examples.strategies;
+
+import com.early_reflection.api.Broker;
+import com.early_reflection.api.Quote;
+import com.early_reflection.api.Strategy;
+import com.early_reflection.api.Trade;
 
 /**
  * Simple dollar cost averaging strategy.

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.early_reflections.ui.AwesomeIcons?>
-<?import com.early_reflections.ui.Chart?>
+<?import com.early_reflection.ui.AwesomeIcons?>
+<?import com.early_reflection.ui.Chart?>
 <?import javafx.scene.chart.AreaChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.early_reflections.ui.Controller">
+<BorderPane xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.early_reflection.ui.Controller">
     <center>
         <SplitPane dividerPositions="0.9412698412698413">
             <items>

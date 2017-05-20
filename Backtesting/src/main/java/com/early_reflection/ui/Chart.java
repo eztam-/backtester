@@ -1,4 +1,4 @@
-package com.early_reflections.ui;
+package com.early_reflection.ui;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;

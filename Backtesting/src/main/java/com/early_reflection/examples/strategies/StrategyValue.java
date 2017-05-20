@@ -1,8 +1,12 @@
-package com.early_reflections;
+package com.early_reflection.examples.strategies;
 
-import com.early_reflections.indicators.SP500ShillerPe;
+import com.early_reflection.api.Broker;
+import com.early_reflection.api.Quote;
+import com.early_reflection.api.Strategy;
+import com.early_reflection.api.Trade;
+import com.early_reflection.examples.indicators.SP500ShillerPe;
 
-public class StrategyValue extends Strategy{
+public class StrategyValue extends Strategy {
 
     private SP500ShillerPe shillerPe = new SP500ShillerPe();
 

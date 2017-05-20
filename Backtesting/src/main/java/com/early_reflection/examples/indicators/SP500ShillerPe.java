@@ -1,13 +1,14 @@
-package com.early_reflections.indicators;
+package com.early_reflection.examples.indicators;
 
-import com.early_reflections.Quote;
-import com.early_reflections.data.local.LocalDataSource;
+import com.early_reflection.api.Indicator;
+import com.early_reflection.api.Quote;
+import com.early_reflection.data.local.LocalDataSource;
 import org.joda.time.LocalDate;
 
 import java.util.*;
 
 // TODO is painted suboptimal on the chart sice it has a completely different y axis scale
-public class SP500ShillerPe extends Indicator{
+public class SP500ShillerPe extends Indicator {
 
     private SortedMap<LocalDate, Double> shillerPeValues = new TreeMap<>();
 

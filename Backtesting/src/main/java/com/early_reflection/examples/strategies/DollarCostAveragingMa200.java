@@ -1,6 +1,10 @@
-package com.early_reflections;
+package com.early_reflection.examples.strategies;
 
-import com.early_reflections.indicators.MovingAverage;
+import com.early_reflection.api.Broker;
+import com.early_reflection.api.Quote;
+import com.early_reflection.api.Strategy;
+import com.early_reflection.api.Trade;
+import com.early_reflection.examples.indicators.MovingAverage;
 import org.joda.time.LocalDate;
 
 /**

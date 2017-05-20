@@ -1,18 +1,16 @@
-package com.early_reflections;
+package com.early_reflection.api;
 
 public class Trade {
 
-    private int quantity;
+    private final int quantity;
     public enum Type {BUY,SELL}
-    private boolean isSell, isBuy;
+    private final boolean isSell, isBuy;
 
     public Trade(Type type, int quantity){
         this.quantity = quantity;
         isBuy = type == Type.BUY;
         isSell = type == Type.SELL;
     }
-
-    public Trade(){}
 
     public boolean isSell(){
        return  isSell;

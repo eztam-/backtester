@@ -1,8 +1,8 @@
-package com.early_reflections.data.local;
+package com.early_reflection.data.local;
 
 
-import com.early_reflections.Quote;
-import com.early_reflections.tools.JsonConverter;
+import com.early_reflection.api.Quote;
+import com.early_reflection.tools.JsonConverter;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.LocalDate;

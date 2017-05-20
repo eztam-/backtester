@@ -1,12 +1,12 @@
-package com.early_reflections.data.yahoo;
+package com.early_reflection.data.yahoo;
 
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
-import com.early_reflections.Quote;
-import com.early_reflections.ui.UiException;
+import com.early_reflection.api.Quote;
+import com.early_reflection.ui.UiException;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -46,10 +46,10 @@ public class YahooDataSource {
     }
 
     // TODO streams
-    private List<com.early_reflections.Quote> convertQuotes(List<ExtQuote> extQuotes) {
-        List<com.early_reflections.Quote> quotes = new ArrayList<>();
+    private List<Quote> convertQuotes(List<ExtQuote> extQuotes) {
+        List<Quote> quotes = new ArrayList<>();
         for(ExtQuote q: extQuotes){
-            quotes.add(new com.early_reflections.Quote(q.getDate(), q.getOpen()));
+            quotes.add(new Quote(q.getDate(), q.getOpen()));
         }
         return quotes;
     }

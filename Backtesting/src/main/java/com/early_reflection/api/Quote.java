@@ -1,4 +1,4 @@
-package com.early_reflections;
+package com.early_reflection.api;
 
 import org.joda.time.LocalDate;
 

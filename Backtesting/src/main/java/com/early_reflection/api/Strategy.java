@@ -1,9 +1,7 @@
-package com.early_reflections;
+package com.early_reflection.api;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.early_reflections.indicators.Indicator;
 
 public abstract class Strategy {
 
@@ -19,8 +17,7 @@ public abstract class Strategy {
 		for(Indicator i: indicators){
 		    i.processTick(quote);
         }
-		Trade trade = tick(quote);
-		return trade == null ? new Trade() : trade;
+		return tick(quote);
 	}
 
 	/**

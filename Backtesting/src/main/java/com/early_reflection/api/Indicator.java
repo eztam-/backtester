@@ -1,18 +1,14 @@
-package com.early_reflections.indicators;
+package com.early_reflection.api;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.*;
 
-import com.early_reflections.Quote;
 import org.joda.time.LocalDate;
 
 public abstract class Indicator {
 
-    private List<Quote> quotes = new ArrayList<>();
+    private final List<Quote> quotes = new ArrayList<>();
 
-    private SortedMap<LocalDate, Double> values = new ConcurrentSkipListMap<>();
+    private final SortedMap<LocalDate, Double> values = Collections.synchronizedSortedMap(new TreeMap<>());
 
     /**
      * @return A unique identifier for the indicator. This identifier is also used as label on the chart.

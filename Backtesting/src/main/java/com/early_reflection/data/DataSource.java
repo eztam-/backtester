@@ -1,8 +1,8 @@
-package com.early_reflections.data;
+package com.early_reflection.data;
 
-import com.early_reflections.Quote;
-import com.early_reflections.data.local.LocalDataSource;
-import com.early_reflections.data.yahoo.YahooDataSource;
+import com.early_reflection.api.Quote;
+import com.early_reflection.data.local.LocalDataSource;
+import com.early_reflection.data.yahoo.YahooDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

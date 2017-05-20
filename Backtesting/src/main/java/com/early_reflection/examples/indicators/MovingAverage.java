@@ -1,6 +1,7 @@
-package com.early_reflections.indicators;
+package com.early_reflection.examples.indicators;
 
-import com.early_reflections.Quote;
+import com.early_reflection.api.Indicator;
+import com.early_reflection.api.Quote;
 
 
 public class MovingAverage extends Indicator {

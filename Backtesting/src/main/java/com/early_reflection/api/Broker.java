@@ -1,4 +1,4 @@
-package com.early_reflections;
+package com.early_reflection.api;
 
 
 public class Broker {
@@ -9,7 +9,7 @@ public class Broker {
     private int holdings = 0;
     private static Broker instance;
 
-    private Broker(){}
+    private Broker(){} // Singleton
 
     public class BrokerException extends RuntimeException{
         public BrokerException(String message) {
